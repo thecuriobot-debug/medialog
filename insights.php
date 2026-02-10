@@ -111,11 +111,53 @@ $pagesPerDay = $daysIntoYear > 0 ? round($totalPages / $daysIntoYear, 1) : 0;
 $booksPerDayThisMonth = $daysIntoMonth > 0 ? round($booksThisMonth / $daysIntoMonth, 2) : 0;
 $moviesPerDayThisMonth = $daysIntoMonth > 0 ? round($moviesThisMonth / $daysIntoMonth, 2) : 0;
 
-// Projections
+// Fallback logic: if current year data is 0, use previous year
+$displayYear = $currentYear;
+$displayBooksThisYear = $booksThisYear;
+$displayMoviesThisYear = $moviesThisYear;
+$displayPagesThisYear = $totalPages;
+$displayBooksPerDay = $booksPerDay;
+$displayMoviesPerDay = $moviesPerDay;
+$displayPagesPerDay = $pagesPerDay;
+
+if ($booksThisYear == 0 || $moviesThisYear == 0) {
+    // Try previous year
+    $prevYear = $currentYear - 1;
+    $prevYearBooks = 0;
+    $prevYearMovies = 0;
+    $prevYearPages = 0;
+    
+    foreach ($books as $book) {
+        if (date('Y', strtotime($book['publish_date'])) == $prevYear) {
+            $prevYearBooks++;
+            if (preg_match('/(\d+)\s+pages/', $book['description'], $matches)) {
+                $prevYearPages += (int)$matches[1];
+            }
+        }
+    }
+    
+    foreach ($movies as $movie) {
+        if (date('Y', strtotime($movie['publish_date'])) == $prevYear) {
+            $prevYearMovies++;
+        }
+    }
+    
+    if ($prevYearBooks > 0 || $prevYearMovies > 0) {
+        $displayYear = $prevYear;
+        $displayBooksThisYear = $prevYearBooks;
+        $displayMoviesThisYear = $prevYearMovies;
+        $displayPagesThisYear = $prevYearPages;
+        $displayBooksPerDay = round($prevYearBooks / 365, 2);
+        $displayMoviesPerDay = round($prevYearMovies / 365, 2);
+        $displayPagesPerDay = round($prevYearPages / 365, 1);
+    }
+}
+
+// Projections (use display values)
 $daysInYear = 365;
-$projectedBooks = round($booksPerDay * $daysInYear);
-$projectedMovies = round($moviesPerDay * $daysInYear);
-$projectedPages = round($pagesPerDay * $daysInYear);
+$projectedBooks = round($displayBooksPerDay * $daysInYear);
+$projectedMovies = round($displayMoviesPerDay * $daysInYear);
+$projectedPages = round($displayPagesPerDay * $daysInYear);
 
 // Find peak months
 $peakBookMonth = array_search(max($monthlyBooks), $monthlyBooks);
@@ -470,21 +512,21 @@ if (in_array($today, $allDates) || in_array($yesterday, $allDates)) {
         <h1>📊 Advanced Insights</h1>
         <div class="subtitle">Deep analytics on your media consumption patterns</div>
         
-        <h2>🔥 Current Pace</h2>
+        <h2>🔥 Current Pace <?php if ($displayYear != date('Y')) echo "({$displayYear} data)"; ?></h2>
         
         <div class="stats-grid">
             <div class="stat-card highlight">
-                <div class="stat-number"><?= $booksPerDay ?></div>
+                <div class="stat-number"><?= $displayBooksPerDay ?></div>
                 <div class="stat-label">Books/Day</div>
             </div>
             
             <div class="stat-card highlight">
-                <div class="stat-number"><?= $moviesPerDay ?></div>
+                <div class="stat-number"><?= $displayMoviesPerDay ?></div>
                 <div class="stat-label">Movies/Day</div>
             </div>
             
             <div class="stat-card highlight">
-                <div class="stat-number"><?= $pagesPerDay ?></div>
+                <div class="stat-number"><?= $displayPagesPerDay ?></div>
                 <div class="stat-label">Pages/Day</div>
             </div>
             
@@ -499,7 +541,7 @@ if (in_array($today, $allDates) || in_array($yesterday, $allDates)) {
             </div>
         </div>
         
-        <h2>📈 <?= $currentYear ?> Projections</h2>
+        <h2>📈 <?= $displayYear ?> Projections<?php if ($displayYear != date('Y')) echo " (based on {$displayYear} data)"; ?></h2>
         
         <div class="stats-grid">
             <div class="stat-card">
@@ -518,7 +560,7 @@ if (in_array($today, $allDates) || in_array($yesterday, $allDates)) {
             </div>
             
             <div class="stat-card">
-                <div class="stat-number"><?= $booksThisYear + $moviesThisYear ?> / <?= $projectedBooks + $projectedMovies ?></div>
+                <div class="stat-number"><?= $displayBooksThisYear + $displayMoviesThisYear ?> / <?= $projectedBooks + $projectedMovies ?></div>
                 <div class="stat-label">Total Media</div>
             </div>
         </div>
