@@ -407,16 +407,6 @@ include 'includes/header.php';
         
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number"><?= $totalBooks ?></div>
-                <div class="stat-label">Total Books</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-number"><?= number_format($totalPages) ?></div>
-                <div class="stat-label">Total Pages</div>
-            </div>
-            
-            <div class="stat-card">
                 <div class="stat-number"><?= $totalAuthors ?></div>
                 <div class="stat-label">Authors</div>
             </div>
@@ -437,18 +427,8 @@ include 'includes/header.php';
             </div>
             
             <div class="stat-card">
-                <div class="stat-number"><?= $pagesPerDay ?></div>
-                <div class="stat-label">Pages/Day</div>
-            </div>
-            
-            <div class="stat-card">
                 <div class="stat-number"><?= $booksWithReviews ?></div>
                 <div class="stat-label">With Reviews</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-number"><?= number_format($avgRating, 1) ?> ★</div>
-                <div class="stat-label">Avg Rating</div>
             </div>
         </div>
         
