@@ -582,6 +582,76 @@ $pageStyles = "
         color: #667eea;
     }
     
+    /* Books vs Movies by Month Chart Styles */
+    .dual-line-chart {
+        padding: 20px 0;
+    }
+    
+    .chart-lines {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-around;
+        height: 250px;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .month-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .bars {
+        display: flex;
+        gap: 4px;
+        align-items: flex-end;
+        height: 200px;
+        margin-bottom: 10px;
+    }
+    
+    .bar {
+        width: 20px;
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
+    }
+    
+    .bar.books {
+        background: linear-gradient(to top, #d4af37, #f4d483);
+    }
+    
+    .bar.movies {
+        background: linear-gradient(to top, #667eea, #764ba2);
+    }
+    
+    .bar:hover {
+        opacity: 0.8;
+        transform: scaleY(1.05);
+    }
+    
+    .legend {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.95em;
+        color: #666;
+    }
+    
+    .legend-color {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+    }
+    
     @media (max-width: 768px) {
         h1 {
             font-size: 2em;
