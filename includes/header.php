@@ -378,6 +378,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                 <a href="stats.php" class="<?php echo $currentPage == 'stats' ? 'active' : ''; ?>">Stats</a>
                 <a href="insights.php" class="<?php echo $currentPage == 'insights' ? 'active' : ''; ?>">Insights</a>
                 <a href="visualizations.php" class="<?php echo $currentPage == 'visualizations' ? 'active' : ''; ?>">Visualizations</a>
+                <a href="lists.php" class="<?php echo $currentPage == 'lists' ? 'active' : ''; ?>">Lists</a>
                 <a href="goals.php" class="<?php echo $currentPage == 'goals' ? 'active' : ''; ?>">Goals</a>
                 <a href="settings.php" class="<?php echo $currentPage == 'settings' ? 'active' : ''; ?>">⚙️</a>
             </div>
