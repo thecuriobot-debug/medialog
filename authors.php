@@ -3,12 +3,27 @@ require_once 'config.php';
 
 $pdo = getDB();
 
+// Get current year with fallback logic
+$currentYear = date('Y');
+$stmt = $pdo->query("SELECT COUNT(*) as total FROM posts WHERE site_id = 7 AND YEAR(publish_date) = {$currentYear}");
+$currentYearCount = $stmt->fetch()['total'];
+if ($currentYearCount == 0) {
+    $currentYear = $currentYear - 1;
+}
+
+// Get total books for footer
+$stmt = $pdo->query("SELECT COUNT(*) as total FROM posts WHERE site_id = 7");
+$totalBooks = $stmt->fetch()['total'];
+
+$stmt = $pdo->query("SELECT COUNT(*) as total FROM posts WHERE site_id = 6");
+$totalMovies = $stmt->fetch()['total'];
+
 // Extract authors from titles (format: "Title by Author - Stars")
 $stmt = $pdo->query("
-    SELECT title, url, publish_date 
+    SELECT title, url, publish_date, image_url
     FROM posts 
     WHERE site_id = 7
-    ORDER BY title
+    ORDER BY publish_date DESC
 ");
 
 $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -20,26 +35,41 @@ foreach ($books as $book) {
     if (preg_match('/by (.+?) -/', $book['title'], $matches)) {
         $author = trim($matches[1]);
         if (!isset($authors[$author])) {
-            $authors[$author] = [];
+            $authors[$author] = [
+                'books' => [],
+                'years' => []
+            ];
         }
-        $authors[$author][] = $book;
+        $authors[$author]['books'][] = $book;
+        $year = date('Y', strtotime($book['publish_date']));
+        if (!in_array($year, $authors[$author]['years'])) {
+            $authors[$author]['years'][] = $year;
+        }
     } elseif (preg_match('/by (.+)$/', $book['title'], $matches)) {
-        // No stars, just "Title by Author"
         $author = trim($matches[1]);
         if (!isset($authors[$author])) {
-            $authors[$author] = [];
+            $authors[$author] = [
+                'books' => [],
+                'years' => []
+            ];
         }
-        $authors[$author][] = $book;
+        $authors[$author]['books'][] = $book;
+        $year = date('Y', strtotime($book['publish_date']));
+        if (!in_array($year, $authors[$author]['years'])) {
+            $authors[$author]['years'][] = $year;
+        }
     }
 }
 
 // Sort by book count
 uasort($authors, function($a, $b) {
-    return count($b) - count($a);
+    return count($b['books']) - count($a['books']);
 });
 
 $totalAuthors = count($authors);
-$totalBooks = array_sum(array_map('count', $authors));
+$avgBooksPerAuthor = $totalAuthors > 0 ? round(array_sum(array_map(function($a) { return count($a['books']); }, $authors)) / $totalAuthors, 1) : 0;
+$mostReadAuthor = array_key_first($authors);
+$mostReadCount = count($authors[$mostReadAuthor]['books']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,6 +77,7 @@ $totalBooks = array_sum(array_map('count', $authors));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authors - MediaLog</title>
+    <meta name="description" content="Author analytics: <?= $totalAuthors ?> authors tracked with reading statistics and book collections">
     <style>
         * {
             margin: 0;
@@ -54,21 +85,29 @@ $totalBooks = array_sum(array_map('count', $authors));
             box-sizing: border-box;
         }
         
-        body {
-            font-family: 'Georgia', 'Times New Roman', serif;
-            background: #f5f5f5;
-            padding: 0;
-            color: #1a1a1a;
+        html {
+            overflow-x: hidden;
         }
         
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #1a1a1a;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+        
+        /* Navigation */
         .top-nav {
-            background: #1a1a1a;
-            border-bottom: 3px solid #d4af37;
-            padding: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
         
         .nav-container {
@@ -77,190 +116,307 @@ $totalBooks = array_sum(array_map('count', $authors));
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
+            padding: 0 30px;
         }
         
         .nav-brand {
-            font-family: 'Georgia', serif;
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 28px;
+            font-weight: 800;
             color: #d4af37;
-            padding: 15px 0;
+            padding: 20px 0;
             text-decoration: none;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #d4af37, #f4d483);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .nav-links {
             display: flex;
             list-style: none;
-            gap: 0;
+            gap: 5px;
         }
         
         .nav-links a {
-            display: block;
-            padding: 20px 20px;
-            color: #fff;
+            padding: 20px 18px;
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 600;
             transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            border-bottom: 2px solid transparent;
         }
         
-        .nav-links a:hover {
-            background: #2a2a2a;
-            border-bottom-color: #d4af37;
-        }
-        
+        .nav-links a:hover,
         .nav-links a.active {
-            background: #2a2a2a;
+            color: #d4af37;
             border-bottom-color: #d4af37;
         }
         
+        /* Container */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 40px 20px;
         }
         
-        h1 {
+        /* Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .page-header h1 {
+            font-size: 3em;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .page-header p {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .stat-number {
             font-size: 2.5em;
+            font-weight: 800;
+            color: #1976d2;
             margin-bottom: 10px;
-            color: #1a1a1a;
         }
         
-        .subtitle {
+        .stat-label {
             color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1em;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
         
+        /* Authors Grid */
         .authors-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
         }
         
         .author-card {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
         }
         
         .author-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        
+        .author-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
         }
         
         .author-name {
-            font-size: 1.4em;
-            margin-bottom: 8px;
-            color: #1a1a1a;
-            font-weight: bold;
+            font-size: 1.5em;
+            color: #1976d2;
+            font-weight: 700;
+            margin-bottom: 10px;
         }
         
-        .author-count {
-            color: #d4af37;
+        .author-meta {
+            display: flex;
+            gap: 20px;
             font-size: 0.9em;
-            font-weight: bold;
-            margin-bottom: 15px;
+            color: #666;
         }
         
-        .author-books {
-            max-height: 0;
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .meta-item strong {
+            color: #1976d2;
+        }
+        
+        /* Book Grid */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+        }
+        
+        .book-cover {
+            aspect-ratio: 2/3;
+            border-radius: 8px;
             overflow: hidden;
-            transition: max-height 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
         }
         
-        .author-card.expanded .author-books {
-            max-height: 1000px;
+        .book-cover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         
-        .book-item {
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
-        .book-item:last-child {
-            border-bottom: none;
+        /* Empty State */
+        .empty-state {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
         
-        .book-item a {
-            color: #333;
-            text-decoration: none;
-            display: block;
+        .empty-state h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
         }
         
-        .book-item a:hover {
-            color: #d4af37;
+        .empty-state p {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.6;
         }
         
-        .book-date {
-            font-size: 0.8em;
-            color: #999;
-            margin-left: 10px;
-        }
-        
-        .expand-icon {
-            float: right;
-            color: #999;
-            transition: transform 0.3s ease;
-        }
-        
-        .author-card.expanded .expand-icon {
-            transform: rotate(180deg);
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-links a {
+                font-size: 11px;
+                padding: 15px 12px;
+            }
+            
+            .page-header h1 {
+                font-size: 2em;
+            }
+            
+            .authors-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="top-nav">
         <div class="nav-container">
             <a href="index.php" class="nav-brand">MEDIALOG</a>
-            <ul class="nav-links">
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="books.php">Books</a></li>
-                <li><a href="movies.php">Movies</a></li>
-                <li><a href="authors.php" class="active">Authors</a></li>
-                <li><a href="stats.php">Statistics</a></li>
-                <li><a href="insights.php">Insights</a></li>
-            </ul>
+            <div class="nav-links">
+                <a href="index.php">Dashboard</a>
+                <a href="books.php">Books</a>
+                <a href="movies.php">Movies</a>
+                <a href="authors.php" class="active">Authors</a>
+                <a href="directors.php">Directors</a>
+                <a href="stats.php">Statistics</a>
+                <a href="insights.php">Insights</a>
+            </div>
         </div>
     </nav>
     
     <div class="container">
-        <h1>✍️ Authors</h1>
-        <div class="subtitle"><?= $totalAuthors ?> authors · <?= $totalBooks ?> books</div>
-        
-        <div class="authors-grid">
-            <?php foreach ($authors as $author => $authorBooks): ?>
-                <div class="author-card" onclick="this.classList.toggle('expanded')">
-                    <div class="author-name">
-                        <?= htmlspecialchars($author) ?>
-                        <span class="expand-icon">▼</span>
-                    </div>
-                    <div class="author-count">
-                        <?= count($authorBooks) ?> book<?= count($authorBooks) !== 1 ? 's' : '' ?>
-                    </div>
-                    <div class="author-books">
-                        <?php foreach ($authorBooks as $book): ?>
-                            <div class="book-item">
-                                <a href="<?= htmlspecialchars($book['url']) ?>">
-                                    <?= htmlspecialchars($book['title']) ?>
-                                </a>
-                                <span class="book-date">
-                                    <?= date('M Y', strtotime($book['publish_date'])) ?>
-                                </span>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+        <!-- Header -->
+        <div class="page-header">
+            <h1>📚 Authors</h1>
+            <p>Exploring your favorite writers and their works</p>
         </div>
+        
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number"><?= $totalAuthors ?></div>
+                <div class="stat-label">Total Authors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><?= $totalBooks ?></div>
+                <div class="stat-label">Total Books</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><?= $avgBooksPerAuthor ?></div>
+                <div class="stat-label">Avg per Author</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><?= $mostReadCount ?></div>
+                <div class="stat-label">Most Read</div>
+            </div>
+        </div>
+        
+        <?php if (empty($authors)): ?>
+            <!-- Empty State -->
+            <div class="empty-state">
+                <h2>No Authors Yet</h2>
+                <p>Start tracking your reading by importing books from Goodreads!</p>
+            </div>
+        <?php else: ?>
+            <!-- Authors Grid -->
+            <div class="authors-grid">
+                <?php foreach ($authors as $authorName => $data): ?>
+                    <div class="author-card">
+                        <div class="author-header">
+                            <div class="author-name"><?= htmlspecialchars($authorName) ?></div>
+                            <div class="author-meta">
+                                <div class="meta-item">
+                                    <span>📚</span>
+                                    <strong><?= count($data['books']) ?></strong>
+                                    <span><?= count($data['books']) == 1 ? 'book' : 'books' ?></span>
+                                </div>
+                                <div class="meta-item">
+                                    <span>📅</span>
+                                    <span><?= implode(', ', array_unique($data['years'])) ?></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="books-grid">
+                            <?php foreach (array_slice($data['books'], 0, 12) as $book): ?>
+                                <a href="<?= htmlspecialchars($book['url']) ?>" class="book-cover" target="_blank" title="<?= htmlspecialchars($book['title']) ?>">
+                                    <?php if (!empty($book['image_url'])): ?>
+                                        <img src="<?= htmlspecialchars($book['image_url']) ?>" alt="<?= htmlspecialchars($book['title']) ?>">
+                                    <?php else: ?>
+                                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">📚</div>
+                                    <?php endif; ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
+    
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>
