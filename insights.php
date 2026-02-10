@@ -382,133 +382,304 @@ foreach ($moviesByRating as $stars => $count) {
     }
 }
 $avgMovieRating = $totalMovieRatings > 0 ? round($avgMovieRating / $totalMovieRatings, 2) : 0;
-
-$pageTitle = "Insights";
-$pageStyles = "
-    /* Page-specific overrides and additions */
-    h1 {
-        font-size: 3em;
-        color: white;
-        margin-bottom: 15px;
-        text-shadow: 0 2px 20px rgba(0,0,0,0.3);
-        text-align: center;
-    }
-    
-    h2 {
-        font-size: 1.8em;
-        color: white;
-        margin: 50px 0 25px 0;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        text-align: center;
-        padding: 20px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 12px;
-        backdrop-filter: blur(10px);
-    }
-    
-    .subtitle {
-        font-size: 1.2em;
-        color: rgba(255,255,255,0.9);
-        margin-bottom: 40px;
-        text-align: center;
-    }
-    
-    .stat-card.highlight {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
-        border: 2px solid rgba(102, 126, 234, 0.3);
-    }
-    
-    .stat-card.highlight .stat-number {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 2.5em;
-    }
-    
-    /* Chart Styles for Insights */
-    .chart-container {
-        background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        margin-bottom: 30px;
-    }
-    
-    .chart-title {
-        font-size: 1.5em;
-        font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    
-    .bar-chart {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .bar-row {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    
-    .bar-label {
-        min-width: 120px;
-        font-weight: 600;
-        color: #666;
-        font-size: 0.95em;
-    }
-    
-    .bar-track {
-        flex: 1;
-        background: #e0e0e0;
-        border-radius: 8px;
-        height: 35px;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .bar-fill {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        height: 100%;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        padding: 0 15px;
-        color: white;
-        font-weight: 700;
-        font-size: 0.9em;
-        transition: width 0.5s ease;
-        min-width: fit-content;
-    }
-    
-    @media (max-width: 768px) {
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Insights - MediaLog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #1a1a1a;
+        }
+        
+        .top-nav {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        
+        .nav-brand {
+            font-size: 28px;
+            font-weight: 800;
+            color: #d4af37;
+            padding: 20px 0;
+            text-decoration: none;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #d4af37, #f4d483);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 0;
+        }
+        
+        .nav-links a {
+            display: block;
+            padding: 20px 18px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            color: #d4af37;
+            border-bottom-color: #d4af37;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .page-header h1 {
+            font-size: 3em;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .page-header p {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.9);
+        }
+        
         h1 {
-            font-size: 2em;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: white;
         }
         
         h2 {
+            font-size: 2em;
+            margin: 40px 0 20px 0;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        
+        .stat-card.highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #d4af37;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card.highlight .stat-number {
+            color: white;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-card.highlight .stat-label {
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        .chart-title {
             font-size: 1.5em;
-            margin: 30px 0 20px 0;
+            margin-bottom: 20px;
+            color: #1a1a1a;
         }
         
-        .bar-label {
-            min-width: 80px;
+        .dual-line-chart {
+            height: 300px;
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .chart-lines {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 250px;
+            gap: 8px;
+        }
+        
+        .month-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        
+        .bars {
+            display: flex;
+            gap: 4px;
+            align-items: flex-end;
+            height: 200px;
+            margin-bottom: 10px;
+        }
+        
+        .bar {
+            width: 20px;
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+        }
+        
+        .bar.books {
+            background: #d4af37;
+        }
+        
+        .bar.movies {
+            background: #6c757d;
+        }
+        
+        .bar:hover {
+            opacity: 0.8;
+        }
+        
+        .month-label {
             font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
         }
         
-        .bar-fill {
-            font-size: 0.8em;
-            padding: 0 10px;
+        .legend {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
         }
-    }
-";
-include 'includes/header.php';
-?>
-
-<div class="container">
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .insight-box {
+            background: #f9f9f9;
+            border-left: 4px solid #d4af37;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .insight-box h3 {
+            margin-bottom: 10px;
+            color: #d4af37;
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="index.php" class="nav-brand">MEDIALOG</a>
+            <ul class="nav-links">
+                <li><a href="index.php">Dashboard</a></li>
+                <li><a href="books.php">Books</a></li>
+                <li><a href="movies.php">Movies</a></li>
+                <li><a href="authors.php">Authors</a></li>
+                <li><a href="directors.php">Directors</a></li>
+                <li><a href="stats.php">Statistics</a></li>
+                <li><a href="insights.php" class="active">Insights</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
         <h1>📊 Advanced Insights</h1>
         <div class="subtitle">Deep analytics on your media consumption patterns</div>
         
@@ -672,10 +843,10 @@ include 'includes/header.php';
                     <div style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                             <span style="font-weight: 600;"><?= htmlspecialchars($genre) ?></span>
-                            <span style="color: #c2185b; font-weight: 700;"><?= $count ?></span>
+                            <span style="color: #667eea; font-weight: 700;"><?= $count ?></span>
                         </div>
                         <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
-                            <div style="background: linear-gradient(135deg, #c2185b, #e91e63); height: 100%; width: <?= round(($count / max($topGenres)) * 100) ?>%; transition: width 0.3s;"></div>
+                            <div style="background: linear-gradient(135deg, #667eea, #764ba2); height: 100%; width: <?= round(($count / max($topGenres)) * 100) ?>%; transition: width 0.3s;"></div>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -687,10 +858,10 @@ include 'includes/header.php';
                     <div style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                             <span style="font-weight: 600;"><?= htmlspecialchars(substr($director, 0, 30)) ?></span>
-                            <span style="color: #c2185b; font-weight: 700;"><?= $count ?></span>
+                            <span style="color: #667eea; font-weight: 700;"><?= $count ?></span>
                         </div>
                         <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
-                            <div style="background: linear-gradient(135deg, #c2185b, #e91e63); height: 100%; width: <?= round(($count / max($topDirectors)) * 100) ?>%; transition: width 0.3s;"></div>
+                            <div style="background: linear-gradient(135deg, #667eea, #764ba2); height: 100%; width: <?= round(($count / max($topDirectors)) * 100) ?>%; transition: width 0.3s;"></div>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -705,7 +876,7 @@ include 'includes/header.php';
                         <div style="color: #d4af37; font-size: 1.5em; margin-bottom: 5px;">
                             <?= str_repeat('★', $i) ?>
                         </div>
-                        <div style="font-size: 2em; font-weight: 700; color: #c2185b;">
+                        <div style="font-size: 2em; font-weight: 700; color: #667eea;">
                             <?= $moviesByRating[$i] ?>
                         </div>
                         <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
@@ -722,7 +893,7 @@ include 'includes/header.php';
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px;">
                 <?php foreach ($moviesByDecade as $decade => $count): ?>
                     <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                        <div style="font-size: 1.8em; font-weight: 700; color: #c2185b;">
+                        <div style="font-size: 1.8em; font-weight: 700; color: #667eea;">
                             <?= $count ?>
                         </div>
                         <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
@@ -810,7 +981,7 @@ include 'includes/header.php';
                         <div style="color: #d4af37; margin-top: 5px;"><?= str_repeat('★', floor($avgBookRating)) ?></div>
                     </div>
                     <div style="text-align: center;">
-                        <div style="background: linear-gradient(135deg, #c2185b, #e91e63); width: 80px; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2em;" 
+                        <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 80px; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2em;" 
                              style="height: <?= $avgMovieRating * 40 ?>px;">
                             <?= $avgMovieRating ?>
                         </div>
@@ -837,10 +1008,10 @@ include 'includes/header.php';
                     <div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span style="font-weight: 600;">🎬 Movies</span>
-                            <span style="color: #c2185b; font-weight: 700;"><?= $totalMovies ?></span>
+                            <span style="color: #667eea; font-weight: 700;"><?= $totalMovies ?></span>
                         </div>
                         <div style="background: #e0e0e0; height: 30px; border-radius: 15px; overflow: hidden;">
-                            <div style="background: linear-gradient(135deg, #c2185b, #e91e63); height: 100%; width: <?= ($totalBooks + $totalMovies) > 0 ? round(($totalMovies / ($totalBooks + $totalMovies)) * 100) : 0 ?>%; display: flex; align-items: center; padding: 0 15px; color: white; font-weight: 700;">
+                            <div style="background: linear-gradient(135deg, #667eea, #764ba2); height: 100%; width: <?= ($totalBooks + $totalMovies) > 0 ? round(($totalMovies / ($totalBooks + $totalMovies)) * 100) : 0 ?>%; display: flex; align-items: center; padding: 0 15px; color: white; font-weight: 700;">
                                 <?= ($totalBooks + $totalMovies) > 0 ? round(($totalMovies / ($totalBooks + $totalMovies)) * 100) : 0 ?>%
                             </div>
                         </div>
