@@ -1,0 +1,48 @@
+{
+  "name": "MediaLog - Reading & Watching Tracker",
+  "short_name": "MediaLog",
+  "description": "Track your books and movies with beautiful insights",
+  "start_url": "/medialog/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/medialog/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/medialog/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "lifestyle", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "Books",
+      "short_name": "Books",
+      "description": "View your book collection",
+      "url": "/medialog/books.php",
+      "icons": [{ "src": "/medialog/assets/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Movies",
+      "short_name": "Movies",
+      "description": "View your movie collection",
+      "url": "/medialog/movies.php",
+      "icons": [{ "src": "/medialog/assets/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Stats",
+      "short_name": "Stats",
+      "description": "View your statistics",
+      "url": "/medialog/stats.php",
+      "icons": [{ "src": "/medialog/assets/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
