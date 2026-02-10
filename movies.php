@@ -83,6 +83,13 @@ function getMovieSlug($url) {
     return null;
 }
 
+function getItemId($url) {
+    if (preg_match('/id=(\d+)/', $url, $matches)) {
+        return $matches[1];
+    }
+    return null;
+}
+
 $pageTitle = "Movies";
 $pageStyles = "
     /* Movies Page Styles */
@@ -214,12 +221,13 @@ include 'includes/header.php';
     <?php else: ?>
         <div class="item-grid">
             <?php foreach ($movies as $movie): 
+                $itemId = getItemId($movie['url']);
                 $slug = getMovieSlug($movie['url']);
                 $title = cleanTitle($movie['title']);
                 $stars = getStars($movie['title']);
                 $date = date('M j, Y', strtotime($movie['publish_date']));
             ?>
-                <a href="movie.php?slug=<?php echo $slug; ?>" class="item-card">
+                <a href="review.php?id=<?php echo $itemId; ?>" class="item-card">
                     <?php if ($movie['image_url']): ?>
                         <img src="<?php echo htmlspecialchars($movie['image_url']); ?>" 
                              alt="<?php echo htmlspecialchars($title); ?>" 

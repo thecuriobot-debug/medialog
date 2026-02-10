@@ -1,6 +1,14 @@
 <?php
 require_once 'config.php';
 
+// Helper function to extract item ID from Goodreads URL
+function getItemId($url) {
+    if (preg_match('/id=(\d+)/', $url, $matches)) {
+        return $matches[1];
+    }
+    return null;
+}
+
 // Fetch all Goodreads reviews with content
 $pdo = getDB();
 $stmt = $pdo->query("
@@ -123,8 +131,10 @@ include 'includes/header.php';
     </div>
     
     <div class="reviews-grid">
-        <?php foreach ($reviews as $review): ?>
-        <a href="review.php?id=<?= $review['id'] ?>" class="review-card">
+        <?php foreach ($reviews as $review): 
+            $itemId = getItemId($review['url']);
+        ?>
+        <a href="review.php?id=<?= $itemId ?>" class="review-card">
             <?php if ($review['image_url']): ?>
                 <img src="<?= htmlspecialchars($review['image_url']) ?>" alt="Book cover">
             <?php endif; ?>
@@ -136,9 +146,13 @@ include 'includes/header.php';
                     <?= date('F j, Y', strtotime($review['publish_date'])) ?>
                 </div>
                 
-                <?php if ($review['description']): ?>
+                <?php if ($review['full_content']): ?>
                 <div class="review-excerpt">
-                    <?= htmlspecialchars(substr(strip_tags($review['description']), 0, 150)) ?>...
+                    <?php 
+                    $reviewSnippet = strip_tags(html_entity_decode($review['full_content'], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                    $reviewSnippet = preg_replace('/\s+/', ' ', $reviewSnippet);
+                    echo htmlspecialchars(mb_substr($reviewSnippet, 0, 150)); 
+                    ?>...
                 </div>
                 <?php endif; ?>
             </div>

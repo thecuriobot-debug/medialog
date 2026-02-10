@@ -29,6 +29,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
         }
     </script>
     <style>
+        /* MediaLog v2.0.1 - Grid System Fixed */
         * {
             margin: 0;
             padding: 0;
@@ -238,26 +239,26 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
         
         /* Item Grid */
         .item-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 30px;
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 30px !important;
         }
         
         @media (max-width: 1400px) {
             .item-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(3, 1fr) !important;
             }
         }
         
         @media (max-width: 1000px) {
             .item-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr) !important;
             }
         }
         
         @media (max-width: 600px) {
             .item-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
             }
         }
         
@@ -269,6 +270,8 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             transition: all 0.3s ease;
             text-decoration: none;
             color: inherit;
+            width: 100%;
+            max-width: none;
         }
         
         .item-card:hover {

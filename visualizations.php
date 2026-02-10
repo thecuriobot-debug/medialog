@@ -4,6 +4,30 @@ $pdo = getDB();
 
 $currentYear = date('Y');
 
+// Check if current year has any data
+$currentYearCount = $pdo->query("SELECT COUNT(*) as c FROM posts 
+                                 WHERE YEAR(publish_date) = $currentYear")->fetch()['c'];
+
+// If current year is empty, use last year
+$displayYear = $currentYear;
+if ($currentYearCount == 0) {
+    $displayYear = $currentYear - 1;
+    
+    // Check if last year has data, otherwise go to most recent year with data
+    $lastYearCount = $pdo->query("SELECT COUNT(*) as c FROM posts 
+                                  WHERE YEAR(publish_date) = $displayYear")->fetch()['c'];
+    
+    if ($lastYearCount == 0) {
+        // Find the most recent year that has data
+        $mostRecentYear = $pdo->query("SELECT YEAR(publish_date) as year FROM posts 
+                                       WHERE YEAR(publish_date) > 0 
+                                       ORDER BY publish_date DESC LIMIT 1")->fetch()['year'];
+        if ($mostRecentYear) {
+            $displayYear = $mostRecentYear;
+        }
+    }
+}
+
 // Get reading/watching pace data
 $monthlyBooks = [];
 $monthlyMovies = [];
@@ -12,12 +36,12 @@ for ($month = 1; $month <= 12; $month++) {
     
     $books = $pdo->query("SELECT COUNT(*) as c FROM posts 
                           WHERE site_id = 7 
-                          AND YEAR(publish_date) = $currentYear 
+                          AND YEAR(publish_date) = $displayYear 
                           AND MONTH(publish_date) = $month")->fetch()['c'];
     
     $movies = $pdo->query("SELECT COUNT(*) as c FROM posts 
                            WHERE site_id = 6 
-                           AND YEAR(publish_date) = $currentYear 
+                           AND YEAR(publish_date) = $displayYear 
                            AND MONTH(publish_date) = $month")->fetch()['c'];
     
     $monthlyBooks[$month] = $books;
@@ -44,20 +68,10 @@ while ($row = $stmt->fetch()) {
     }
 }
 
-// Get top genres (from movie descriptions)
+// Get top genres (from movie descriptions) - DISABLED: genres column doesn't exist
 $genreCounts = [];
-$stmt = $pdo->query("SELECT genres FROM posts WHERE site_id = 6 AND genres IS NOT NULL AND genres != ''");
-while ($row = $stmt->fetch()) {
-    $genres = explode(',', $row['genres']);
-    foreach ($genres as $genre) {
-        $genre = trim($genre);
-        if ($genre) {
-            $genreCounts[$genre] = ($genreCounts[$genre] ?? 0) + 1;
-        }
-    }
-}
-arsort($genreCounts);
-$topGenres = array_slice($genreCounts, 0, 10, true);
+// TODO: Extract genres from descriptions or titles when available
+$topGenres = [];
 
 // Get yearly comparison
 $yearlyData = [];
@@ -227,46 +241,6 @@ $maxYearly = $maxYearly ?: 1;
         <p style="font-size: 1.2em; color: rgba(255,255,255,0.9);">Visual insights into your reading and watching habits</p>
     </div>
     
-    <!-- Monthly Pace Chart -->
-    <div class="viz-card" style="margin-bottom: 30px;">
-        <h2>📅 <?php echo $currentYear; ?> Monthly Pace</h2>
-        <div class="bar-chart">
-            <?php 
-            $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            for ($i = 1; $i <= 12; $i++): 
-                $books = $monthlyBooks[$i];
-                $movies = $monthlyMovies[$i];
-                $total = $books + $movies;
-            ?>
-                <div class="bar-row">
-                    <div class="bar-label"><?php echo $months[$i-1]; ?></div>
-                    <div class="bar-container">
-                        <?php if ($books > 0): ?>
-                            <div class="bar-fill books" style="width: <?php echo ($books / $maxMonthly * 100); ?>%; float: left;">
-                                <?php if ($books >= $maxMonthly * 0.15) echo $books; ?>
-                            </div>
-                        <?php endif; ?>
-                        <?php if ($movies > 0): ?>
-                            <div class="bar-fill movies" style="width: <?php echo ($movies / $maxMonthly * 100); ?>%; float: left; margin-left: 2px;">
-                                <?php if ($movies >= $maxMonthly * 0.15) echo $movies; ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="bar-value"><?php echo $total; ?></div>
-                </div>
-            <?php endfor; ?>
-        </div>
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color books"></div>
-                <span>Books</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color movies"></div>
-                <span>Movies</span>
-            </div>
-        </div>
-    </div>
     
     <!-- Rating Distribution -->
     <div class="viz-grid">
@@ -361,6 +335,64 @@ $maxYearly = $maxYearly ?: 1;
         </div>
     </div>
     <?php endif; ?>
+    
+    <!-- Monthly Pace Chart (moved to end) -->
+    <div class="viz-card" style="margin-top: 60px; margin-bottom: 30px;">
+        <h2>📅 <?php echo $displayYear; ?> Monthly Pace</h2>
+        <?php if ($displayYear != $currentYear): ?>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">
+                <em>Showing <?php echo $displayYear; ?> data (no activity in <?php echo $currentYear; ?> yet)</em>
+            </p>
+        <?php endif; ?>
+        
+        <!-- Debug info -->
+        <?php 
+        $totalItems = array_sum($monthlyBooks) + array_sum($monthlyMovies);
+        if ($totalItems == 0): ?>
+            <div style="padding: 40px; text-align: center; color: #666; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px;">
+                <p style="font-size: 1.2em; margin-bottom: 10px;">📊 No data available for <?php echo $displayYear; ?></p>
+                <p style="font-size: 0.9em;">Start logging your books and movies to see your monthly pace!</p>
+            </div>
+        <?php endif; ?>
+        
+        <div class="bar-chart">
+            <?php 
+            $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            for ($i = 1; $i <= 12; $i++): 
+                $books = $monthlyBooks[$i];
+                $movies = $monthlyMovies[$i];
+                $total = $books + $movies;
+            ?>
+                <div class="bar-row">
+                    <div class="bar-label"><?php echo $months[$i-1]; ?></div>
+                    <div class="bar-container">
+                        <?php if ($books > 0): ?>
+                            <div class="bar-fill books" style="width: <?php echo ($books / $maxMonthly * 100); ?>%; float: left;">
+                                <?php if ($books >= $maxMonthly * 0.15) echo $books; ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($movies > 0): ?>
+                            <div class="bar-fill movies" style="width: <?php echo ($movies / $maxMonthly * 100); ?>%; float: left; margin-left: 2px;">
+                                <?php if ($movies >= $maxMonthly * 0.15) echo $movies; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="bar-value"><?php echo $total; ?></div>
+                </div>
+            <?php endfor; ?>
+        </div>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color books"></div>
+                <span>Books</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color movies"></div>
+                <span>Movies</span>
+            </div>
+        </div>
+    </div>
+    
 </div>
 
 <?php include 'includes/footer.php'; ?>

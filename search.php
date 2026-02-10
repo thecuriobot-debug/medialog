@@ -5,6 +5,9 @@ $pdo = getDB();
 $query = $_GET['q'] ?? '';
 $type = $_GET['type'] ?? 'all'; // all, books, movies
 $minRating = $_GET['min_rating'] ?? 0;
+$year = $_GET['year'] ?? 'all';
+$genre = $_GET['genre'] ?? '';
+$hasReview = $_GET['has_review'] ?? 'all';
 
 $results = [];
 $bookCount = 0;
@@ -13,6 +16,26 @@ $movieCount = 0;
 if ($query) {
     // Search books
     if ($type === 'all' || $type === 'books') {
+        $whereConditions = ["site_id = 7"];
+        $searchConditions = [
+            "title LIKE :search",
+            "description LIKE :search",
+            "full_content LIKE :search"
+        ];
+        $whereConditions[] = "(" . implode(" OR ", $searchConditions) . ")";
+        
+        // Year filter
+        if ($year !== 'all') {
+            $whereConditions[] = "YEAR(publish_date) = :year";
+        }
+        
+        // Review filter
+        if ($hasReview === 'yes') {
+            $whereConditions[] = "(full_content IS NOT NULL AND LENGTH(full_content) > 100)";
+        } elseif ($hasReview === 'no') {
+            $whereConditions[] = "(full_content IS NULL OR LENGTH(full_content) <= 100)";
+        }
+        
         $stmt = $pdo->prepare("
             SELECT 
                 id,
@@ -24,17 +47,17 @@ if ($query) {
                 full_content,
                 'book' as media_type
             FROM posts 
-            WHERE site_id = 7
-            AND (
-                title LIKE :search 
-                OR description LIKE :search 
-                OR full_content LIKE :search
-            )
+            WHERE " . implode(" AND ", $whereConditions) . "
             ORDER BY publish_date DESC
-            LIMIT 50
+            LIMIT 100
         ");
-        $searchParam = "%{$query}%";
-        $stmt->execute(['search' => $searchParam]);
+        
+        $params = ['search' => "%{$query}%"];
+        if ($year !== 'all') {
+            $params['year'] = $year;
+        }
+        
+        $stmt->execute($params);
         $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // Filter by rating if specified

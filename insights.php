@@ -1,4 +1,9 @@
 <?php
+// Prevent caching
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 require_once 'config.php';
 
 $pdo = getDB();
@@ -14,7 +19,7 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get all movies
 $stmt = $pdo->query("
-    SELECT title, publish_date, description, full_content, director, genres, runtime_minutes
+    SELECT title, publish_date, description, full_content
     FROM posts 
     WHERE site_id = 6
     ORDER BY publish_date DESC
@@ -233,32 +238,86 @@ $onlyBookDays = count(array_unique(array_diff($bookDates, $movieDates)));
 // Days with only movies
 $onlyMovieDays = count(array_unique(array_diff($movieDates, $bookDates)));
 
-// Busiest day (most media consumed)
-$mediaByDate = [];
+
+// ==========================================
+// VISUALIZATION DATA PREPARATION
+// ==========================================
+
+// Get rating distribution for visualizations
+$ratingDistBooks = ['1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0];
+$ratingDistMovies = ['1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0];
+
 foreach ($books as $book) {
-    $date = date('Y-m-d', strtotime($book['publish_date']));
-    if (!isset($mediaByDate[$date])) {
-        $mediaByDate[$date] = ['books' => 0, 'movies' => 0];
+    $stars = substr_count($book['title'], '★');
+    if ($stars >= 1 && $stars <= 5) {
+        $ratingDistBooks[$stars]++;
     }
-    $mediaByDate[$date]['books']++;
-}
-foreach ($movies as $movie) {
-    $date = date('Y-m-d', strtotime($movie['publish_date']));
-    if (!isset($mediaByDate[$date])) {
-        $mediaByDate[$date] = ['books' => 0, 'movies' => 0];
-    }
-    $mediaByDate[$date]['movies']++;
 }
 
-$busiestDate = null;
-$maxMedia = 0;
-foreach ($mediaByDate as $date => $counts) {
-    $total = $counts['books'] + $counts['movies'];
-    if ($total > $maxMedia) {
-        $maxMedia = $total;
-        $busiestDate = $date;
+foreach ($movies as $movie) {
+    $stars = substr_count($movie['title'], '★');
+    if ($stars >= 1 && $stars <= 5) {
+        $ratingDistMovies[$stars]++;
     }
 }
+
+// Get top genres (from movie descriptions/genres field)
+$genreCounts = [];
+$stmt = $pdo->query("SELECT genres FROM posts WHERE site_id = 6 AND genres IS NOT NULL AND genres != ''");
+while ($row = $stmt->fetch()) {
+    $genres = explode(',', $row['genres']);
+    foreach ($genres as $genre) {
+        $genre = trim($genre);
+        if ($genre) {
+            $genreCounts[$genre] = ($genreCounts[$genre] ?? 0) + 1;
+        }
+    }
+}
+arsort($genreCounts);
+$topGenres = array_slice($genreCounts, 0, 10, true);
+
+// Get yearly comparison data
+$yearlyData = [];
+$stmt = $pdo->query("SELECT YEAR(publish_date) as year, site_id, COUNT(*) as count 
+                     FROM posts 
+                     WHERE YEAR(publish_date) >= " . ($currentYear - 4) . "
+                     GROUP BY YEAR(publish_date), site_id 
+                     ORDER BY year, site_id");
+while ($row = $stmt->fetch()) {
+    $year = $row['year'];
+    if (!isset($yearlyData[$year])) {
+        $yearlyData[$year] = ['books' => 0, 'movies' => 0];
+    }
+    if ($row['site_id'] == 7) {
+        $yearlyData[$year]['books'] = $row['count'];
+    } else if ($row['site_id'] == 6) {
+        $yearlyData[$year]['movies'] = $row['count'];
+    }
+}
+
+// Find display year for monthly pace (same logic as visualizations.php)
+$displayYear = $currentYear;
+$currentYearCountViz = $pdo->query("SELECT COUNT(*) as c FROM posts WHERE YEAR(publish_date) = $currentYear")->fetch()['c'];
+if ($currentYearCountViz == 0) {
+    $displayYear = $currentYear - 1;
+    $lastYearCount = $pdo->query("SELECT COUNT(*) as c FROM posts WHERE YEAR(publish_date) = $displayYear")->fetch()['c'];
+    if ($lastYearCount == 0) {
+        $mostRecentYear = $pdo->query("SELECT YEAR(publish_date) as year FROM posts WHERE YEAR(publish_date) > 0 ORDER BY publish_date DESC LIMIT 1")->fetch()['year'];
+        if ($mostRecentYear) {
+            $displayYear = $mostRecentYear;
+        }
+    }
+}
+
+// Calculate max values for charts
+$maxRating = max(array_merge($ratingDistBooks, $ratingDistMovies)) ?: 1;
+$maxGenre = max($topGenres) ?: 1;
+$maxYearly = 0;
+foreach ($yearlyData as $data) {
+    $maxYearly = max($maxYearly, $data['books'], $data['movies']);
+}
+$maxYearly = $maxYearly ?: 1;
+$maxMonthly = max(array_merge($monthlyBooks, $monthlyMovies)) ?: 1;
 
 // Average movies per book
 $avgMoviesPerBook = count($books) > 0 ? round(count($movies) / count($books), 2) : 0;
@@ -386,6 +445,7 @@ $avgMovieRating = $totalMovieRatings > 0 ? round($avgMovieRating / $totalMovieRa
 <?php
 $pageTitle = "Insights";
 $pageStyles = "
+    /* MediaLog Insights - Updated: " . date('Y-m-d H:i:s') . " */
     /* Page-specific overrides and additions */
     h1 {
         font-size: 3em;
@@ -676,6 +736,111 @@ $pageStyles = "
             grid-template-columns: 1fr;
         }
     }
+    
+    /* Visualization Cards Styles */
+    .viz-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .viz-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .viz-card h2 {
+        color: #667eea;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+        font-size: 1.5em;
+    }
+    
+    .bar-chart {
+        margin: 20px 0;
+    }
+    
+    .bar-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        gap: 15px;
+    }
+    
+    .bar-label {
+        min-width: 80px;
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .bar-container {
+        flex: 1;
+        height: 30px;
+        background: #f0f0f0;
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .bar-fill {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.85em;
+        transition: width 0.3s ease;
+    }
+    
+    .bar-fill.books {
+        background: linear-gradient(135deg, #d4af37, #f4d483);
+    }
+    
+    .bar-fill.movies {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    
+    .bar-value {
+        min-width: 40px;
+        text-align: right;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .legend {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 2px solid #e0e0e0;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .legend-color {
+        width: 30px;
+        height: 20px;
+        border-radius: 5px;
+    }
+    
+    .legend-color.books {
+        background: linear-gradient(135deg, #d4af37, #f4d483);
+    }
+    
+    .legend-color.movies {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
 ";
 include 'includes/header.php';
 ?>
@@ -768,13 +933,6 @@ include 'includes/header.php';
                 <div class="stat-label">Movies/Book Ratio</div>
             </div>
             
-            <?php if ($busiestDate): ?>
-            <div class="stat-card highlight">
-                <div class="stat-number"><?= $maxMedia ?></div>
-                <div class="stat-label">Busiest Day</div>
-            </div>
-            <?php endif; ?>
-            
             <?php if ($totalHoursWatched > 0): ?>
             <div class="stat-card">
                 <div class="stat-number"><?= number_format($totalHoursWatched) ?> hrs</div>
@@ -790,24 +948,6 @@ include 'includes/header.php';
             <?php endif; ?>
         </div>
         
-        <?php if ($busiestDate): ?>
-        <div class="insight-box">
-            <h3>🔥 Busiest Media Day</h3>
-            <p><strong>Date:</strong> <?= date('F j, Y', strtotime($busiestDate)) ?></p>
-            <p><strong>Activity:</strong> <?= $mediaByDate[$busiestDate]['books'] ?> book(s) + <?= $mediaByDate[$busiestDate]['movies'] ?> movie(s) = <?= $maxMedia ?> total</p>
-            <p style="margin-top: 10px; color: #666;">
-                <?php if ($mediaByDate[$busiestDate]['books'] > 1): ?>
-                    📚 Multiple books finished
-                <?php endif; ?>
-                <?php if ($mediaByDate[$busiestDate]['movies'] > 1): ?>
-                    🎬 Movie marathon day
-                <?php endif; ?>
-                <?php if ($mediaByDate[$busiestDate]['books'] > 0 && $mediaByDate[$busiestDate]['movies'] > 0): ?>
-                    | Perfect media balance!
-                <?php endif; ?>
-            </p>
-        </div>
-        <?php endif; ?>
         
         <h2>🎬 Movie Deep Dive</h2>
         
@@ -1129,6 +1269,161 @@ include 'includes/header.php';
                 <div class="stat-label">Books Ratio</div>
             </div>
         </div>
+    
+    <!-- VISUALIZATIONS SECTION -->
+    <div>
+        
+        <!-- Rating Distribution -->
+        <div class="viz-grid">
+            <div class="viz-card">
+                <h2>⭐ Book Ratings</h2>
+                <div class="bar-chart">
+                    <?php for ($i = 5; $i >= 1; $i--): ?>
+                        <div class="bar-row">
+                            <div class="bar-label"><?php echo str_repeat('★', $i); ?></div>
+                            <div class="bar-container">
+                                <div class="bar-fill books" style="width: <?php echo ($ratingDistBooks[$i] / $maxRating * 100); ?>%;">
+                                    <?php if ($ratingDistBooks[$i] > 0) echo $ratingDistBooks[$i]; ?>
+                                </div>
+                            </div>
+                            <div class="bar-value"><?php echo $ratingDistBooks[$i]; ?></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+            </div>
+            
+            <div class="viz-card">
+                <h2>⭐ Movie Ratings</h2>
+                <div class="bar-chart">
+                    <?php for ($i = 5; $i >= 1; $i--): ?>
+                        <div class="bar-row">
+                            <div class="bar-label"><?php echo str_repeat('★', $i); ?></div>
+                            <div class="bar-container">
+                                <div class="bar-fill movies" style="width: <?php echo ($ratingDistMovies[$i] / $maxRating * 100); ?>%;">
+                                    <?php if ($ratingDistMovies[$i] > 0) echo $ratingDistMovies[$i]; ?>
+                                </div>
+                            </div>
+                            <div class="bar-value"><?php echo $ratingDistMovies[$i]; ?></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Genres -->
+        <?php if (!empty($topGenres)): ?>
+        <div class="viz-card" style="margin-bottom: 30px;">
+            <h2>🎬 Top Movie Genres</h2>
+            <div class="bar-chart">
+                <?php foreach ($topGenres as $genre => $count): ?>
+                    <div class="bar-row">
+                        <div class="bar-label"><?php echo htmlspecialchars($genre); ?></div>
+                        <div class="bar-container">
+                            <div class="bar-fill movies" style="width: <?php echo ($count / $maxGenre * 100); ?>%;">
+                                <?php if ($count >= $maxGenre * 0.15) echo $count; ?>
+                            </div>
+                        </div>
+                        <div class="bar-value"><?php echo $count; ?></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Yearly Comparison -->
+        <?php if (!empty($yearlyData)): ?>
+        <div class="viz-card">
+            <h2>📈 Year-over-Year Comparison</h2>
+            <div class="bar-chart">
+                <?php foreach ($yearlyData as $year => $data): ?>
+                    <div class="bar-row">
+                        <div class="bar-label"><?php echo $year; ?></div>
+                        <div class="bar-container">
+                            <?php if ($data['books'] > 0): ?>
+                                <div class="bar-fill books" style="width: <?php echo ($data['books'] / $maxYearly * 100); ?>%; float: left;">
+                                    <?php if ($data['books'] >= $maxYearly * 0.12) echo $data['books']; ?>
+                                </div>
+                            <?php endif; ?>
+                            <?php if ($data['movies'] > 0): ?>
+                                <div class="bar-fill movies" style="width: <?php echo ($data['movies'] / $maxYearly * 100); ?>%; float: left; margin-left: 2px;">
+                                    <?php if ($data['movies'] >= $maxYearly * 0.12) echo $data['movies']; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="bar-value"><?php echo ($data['books'] + $data['movies']); ?></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color books"></div>
+                    <span>Books</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color movies"></div>
+                    <span>Movies</span>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Monthly Pace Chart -->
+        <div class="viz-card" style="margin-top: 60px; margin-bottom: 30px;">
+            <h2>📅 <?php echo $displayYear; ?> Monthly Pace</h2>
+            <?php if ($displayYear != date('Y')): ?>
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">
+                    <em>Showing <?php echo $displayYear; ?> data (no activity in <?php echo date('Y'); ?> yet)</em>
+                </p>
+            <?php endif; ?>
+            
+            <?php 
+            $totalItems = array_sum($monthlyBooks) + array_sum($monthlyMovies);
+            if ($totalItems == 0): ?>
+                <div style="padding: 40px; text-align: center; color: #666; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px;">
+                    <p style="font-size: 1.2em; margin-bottom: 10px;">📊 No data available for <?php echo $displayYear; ?></p>
+                    <p style="font-size: 0.9em;">Start logging your books and movies to see your monthly pace!</p>
+                </div>
+            <?php endif; ?>
+            
+            <div class="bar-chart">
+                <?php 
+                $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                for ($i = 1; $i <= 12; $i++): 
+                    $booksMonth = $monthlyBooks[$i];
+                    $moviesMonth = $monthlyMovies[$i];
+                    $total = $booksMonth + $moviesMonth;
+                ?>
+                    <div class="bar-row">
+                        <div class="bar-label"><?php echo $months[$i-1]; ?></div>
+                        <div class="bar-container">
+                            <?php if ($booksMonth > 0): ?>
+                                <div class="bar-fill books" style="width: <?php echo ($booksMonth / $maxMonthly * 100); ?>%; float: left;">
+                                    <?php if ($booksMonth >= $maxMonthly * 0.15) echo $booksMonth; ?>
+                                </div>
+                            <?php endif; ?>
+                            <?php if ($moviesMonth > 0): ?>
+                                <div class="bar-fill movies" style="width: <?php echo ($moviesMonth / $maxMonthly * 100); ?>%; float: left; margin-left: 2px;">
+                                    <?php if ($moviesMonth >= $maxMonthly * 0.15) echo $moviesMonth; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="bar-value"><?php echo $total; ?></div>
+                    </div>
+                <?php endfor; ?>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color books"></div>
+                    <span>Books</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color movies"></div>
+                    <span>Movies</span>
+                </div>
+            </div>
+        </div>
     </div>
+    
+</div> <!-- Close main container -->
 </body>
 </html>
