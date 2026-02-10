@@ -38,9 +38,10 @@ $pageStyles = "
     
     .reviews-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 320px));
         gap: 30px;
         margin-top: 30px;
+        justify-content: center;
     }
     
     .review-card {
