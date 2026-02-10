@@ -1,143 +1,152 @@
 <?php
 require_once 'config.php';
 
-if ($argc < 2) {
-    die("Usage: php import-letterboxd-csv.php <path-to-diary.csv>\n");
-}
+echo "📥 Letterboxd CSV Import\n";
+echo "========================\n\n";
 
-$csvFile = $argv[1];
-
+// Check for CSV file
+$csvFile = __DIR__ . '/letterboxd-data.csv';
 if (!file_exists($csvFile)) {
-    die("Error: File not found: {$csvFile}\n");
+    echo "❌ Error: letterboxd-data.csv not found!\n\n";
+    echo "Please:\n";
+    echo "1. Go to https://letterboxd.com/settings/data/\n";
+    echo "2. Click 'Export Your Data'\n";
+    echo "3. Download the ZIP file from your email\n";
+    echo "4. Extract 'watched.csv' or 'diary.csv'\n";
+    echo "5. Rename it to 'letterboxd-data.csv'\n";
+    echo "6. Place it in: " . __DIR__ . "/\n";
+    exit(1);
 }
-
-echo "Letterboxd CSV Import\n";
-echo "=====================\n\n";
-echo "File: {$csvFile}\n\n";
 
 $pdo = getDB();
 
-$handle = fopen($csvFile, 'r');
-if (!$handle) {
-    die("Error: Could not open CSV file\n");
+echo "📂 Reading CSV file...\n";
+$file = fopen($csvFile, 'r');
+$header = fgetcsv($file); // Read header row
+
+echo "📋 CSV Columns: " . implode(', ', $header) . "\n\n";
+
+// Detect which CSV type this is
+$isWatched = in_array('Name', $header);
+$isDiary = in_array('Date', $header);
+
+if (!$isWatched && !$isDiary) {
+    echo "❌ Error: Unrecognized CSV format\n";
+    echo "Expected columns: Name, Year, Letterboxd URI, Rating\n";
+    echo "OR: Date, Name, Year, Letterboxd URI, Rating\n";
+    exit(1);
 }
 
-// Read header
-$headers = fgetcsv($handle);
-echo "CSV Headers: " . implode(', ', $headers) . "\n\n";
-
-// Find column indices
-$colMap = array_flip($headers);
+echo "✅ Detected: " . ($isDiary ? "Diary CSV" : "Watched CSV") . "\n\n";
 
 $imported = 0;
 $updated = 0;
 $skipped = 0;
-$row = 0;
 
-while (($data = fgetcsv($handle)) !== false) {
-    $row++;
+while (($row = fgetcsv($file)) !== false) {
+    $data = array_combine($header, $row);
     
-    // Extract data from CSV
-    $filmName = $data[$colMap['Name']] ?? '';
-    $year = $data[$colMap['Year']] ?? '';
-    $letterboxdURI = $data[$colMap['Letterboxd URI']] ?? '';
-    $rating = $data[$colMap['Rating']] ?? '';
-    $watchedDate = $data[$colMap['Watched Date']] ?? '';
-    $review = $data[$colMap['Review']] ?? '';
-    $rewatch = isset($colMap['Rewatch']) ? ($data[$colMap['Rewatch']] ?? '') : '';
+    // Extract data
+    $name = $data['Name'];
+    $year = $data['Year'];
+    $letterboxdUri = $data['Letterboxd URI'];
+    $rating = isset($data['Rating']) ? floatval($data['Rating']) : 0;
     
-    if (!$filmName || !$letterboxdURI) {
-        $skipped++;
-        continue;
+    // Get date
+    if ($isDiary && isset($data['Date'])) {
+        $watchDate = $data['Date']; // Format: YYYY-MM-DD
+    } else {
+        // For watched.csv without dates, use current date
+        $watchDate = date('Y-m-d');
     }
     
-    echo sprintf("[%d] %s (%s)... ", $row, substr($filmName, 0, 40), $year);
+    // Get rewatch status
+    $isRewatch = isset($data['Rewatch']) && strtolower($data['Rewatch']) === 'yes';
     
-    // Build title with year and rating
-    $fullTitle = $filmName;
-    if ($year) {
-        $fullTitle .= ", {$year}";
+    // Get review
+    $review = isset($data['Review']) ? $data['Review'] : '';
+    $tags = isset($data['Tags']) ? $data['Tags'] : '';
+    
+    // Build full URL
+    $url = 'https://letterboxd.com' . $letterboxdUri;
+    $urlHash = hash('sha256', $url);
+    
+    // Build title with stars
+    $stars = '';
+    if ($rating > 0) {
+        $starCount = round($rating);
+        $stars = ' - ' . str_repeat('★', $starCount);
     }
-    if ($rating) {
-        $stars = str_repeat('★', (int)$rating);
-        $fullTitle .= " - {$stars}";
+    $title = "{$name}, {$year}{$stars}";
+    
+    // Build description
+    $description = "Watched on {$watchDate}";
+    if ($rating > 0) {
+        $description .= " - Rating: {$rating}/5";
     }
-    if ($rewatch === 'Yes') {
-        $fullTitle .= " 🔁";
+    if ($isRewatch) {
+        $description .= " (Rewatch)";
+    }
+    if ($tags) {
+        $description .= " - Tags: {$tags}";
     }
     
     // Check if exists
-    $urlHash = hash('sha256', $letterboxdURI);
     $stmt = $pdo->prepare("SELECT id FROM posts WHERE url_hash = ?");
     $stmt->execute([$urlHash]);
     $existing = $stmt->fetch();
     
-    // Format watch date
-    $publishDate = $watchedDate ? date('Y-m-d H:i:s', strtotime($watchedDate)) : date('Y-m-d H:i:s');
-    
-    // Build description
-    $description = '';
-    if ($rating) {
-        $description = "Rated: " . str_repeat('★', (int)$rating);
-    }
-    if ($rewatch === 'Yes') {
-        $description .= " (Rewatch)";
-    }
-    
     if ($existing) {
-        // Update if we have a review and don't have one yet
+        // Update existing entry
         $stmt = $pdo->prepare("
-            UPDATE posts 
-            SET title = ?,
-                full_content = COALESCE(NULLIF(full_content, ''), ?),
-                publish_date = ?,
-                description = ?
-            WHERE id = ?
+            UPDATE posts SET
+                title = ?,
+                description = ?,
+                full_content = ?,
+                publish_date = ?
+            WHERE url_hash = ?
         ");
         $stmt->execute([
-            $fullTitle,
-            $review ?: null,
-            $publishDate,
+            $title,
             $description,
-            $existing['id']
+            $review,
+            $watchDate . ' 00:00:00',
+            $urlHash
         ]);
-        echo "UPDATED\n";
         $updated++;
+        echo "📝 Updated: {$name} ({$year})\n";
     } else {
-        // Insert new
+        // Insert new entry
         $stmt = $pdo->prepare("
-            INSERT INTO posts (site_id, title, url, url_hash, publish_date, description, full_content)
-            VALUES (6, ?, ?, ?, ?, ?, ?)
+            INSERT INTO posts (
+                site_id, title, url, url_hash, description, 
+                full_content, publish_date, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
         ");
         $stmt->execute([
-            $fullTitle,
-            $letterboxdURI,
+            6, // Letterboxd site_id
+            $title,
+            $url,
             $urlHash,
-            $publishDate,
             $description,
-            $review ?: null
+            $review,
+            $watchDate . ' 00:00:00'
         ]);
-        echo "IMPORTED\n";
         $imported++;
+        echo "✅ Imported: {$name} ({$year}) - {$watchDate}\n";
     }
 }
 
-fclose($handle);
+fclose($file);
 
-echo "\n" . str_repeat("=", 50) . "\n";
-echo "✓ Import Complete!\n\n";
-echo "Imported: {$imported} new films\n";
-echo "Updated:  {$updated} existing films\n";
-echo "Skipped:  {$skipped} rows\n";
-echo "Total:    {$row} rows processed\n";
-
-// Show stats
-$total = $pdo->query("SELECT COUNT(*) FROM posts WHERE site_id = 6")->fetchColumn();
-$withReviews = $pdo->query("SELECT COUNT(*) FROM posts WHERE site_id = 6 AND full_content IS NOT NULL AND LENGTH(full_content) > 10")->fetchColumn();
-$withRatings = $pdo->query("SELECT COUNT(*) FROM posts WHERE site_id = 6 AND title LIKE '%★%'")->fetchColumn();
-
-echo "\n" . str_repeat("=", 50) . "\n";
-echo "DATABASE STATS:\n";
-echo "Total films:       {$total}\n";
-echo "With reviews:      {$withReviews}\n";
-echo "With star ratings: {$withRatings}\n";
+echo "\n";
+echo "========================\n";
+echo "📊 Import Summary:\n";
+echo "========================\n";
+echo "✅ Imported: {$imported} new movies\n";
+echo "📝 Updated:  {$updated} existing movies\n";
+echo "⏭️  Skipped:  {$skipped} duplicates\n";
+echo "\n";
+echo "🎬 Total processed: " . ($imported + $updated + $skipped) . "\n";
+echo "\n";
+echo "✨ Import complete!\n";
