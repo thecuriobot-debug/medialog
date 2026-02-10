@@ -519,44 +519,6 @@ include 'includes/header.php';
                 <?php endforeach; ?>
             </div>
         </div>
-        
-        <!-- Visual Gallery Section -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">🎨 Visual Gallery</h2>
-                <span class="card-icon">🖼️</span>
-            </div>
-            
-            <div class="grid-gallery">
-                <?php 
-                // Mix of recent books and movies for gallery
-                $gallery = array_merge(
-                    array_slice($recentBooks, 0, 4),
-                    array_slice($recentMovies, 0, 4)
-                );
-                shuffle($gallery);
-                $gallery = array_slice($gallery, 0, 8);
-                
-                foreach ($gallery as $item): 
-                    if (!$item['image_url']) continue;
-                    $itemId = getItemId($item['url'], $item['type']);
-                    $stars = getStars($item['title']);
-                    $cleanedTitle = cleanTitle($item['title'], $item['type']);
-                    $link = $item['type'] === 'book' ? "review.php?id={$itemId}" : "movie.php?id={$itemId}";
-                ?>
-                    <a href="<?= $link ?>" class="gallery-item">
-                        <img src="<?= htmlspecialchars($item['image_url']) ?>" 
-                             alt="<?= htmlspecialchars($cleanedTitle) ?>">
-                        <div class="gallery-overlay">
-                            <div class="gallery-title"><?= htmlspecialchars($cleanedTitle) ?></div>
-                            <?php if ($stars > 0): ?>
-                                <div class="gallery-stars"><?= str_repeat('★', $stars) ?></div>
-                            <?php endif; ?>
-                        </div>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        </div>
     </div>
 </body>
 </html>
