@@ -70,7 +70,7 @@ MediaLog is a personal media consumption tracker built entirely through human-AI
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/medialog.git
+git clone https://github.com/thecuriobot-debug/medialog.git
 cd medialog
 
 # Configure database
@@ -264,7 +264,7 @@ Want to see how this was built? Check out the complete [development case study](
 
 Thomas Hunt - [thomashunt.com](http://www.thomashunt.com)
 
-Project Link: [https://github.com/yourusername/medialog](https://github.com/yourusername/medialog)
+Project Link: [https://github.com/thecuriobot-debug/medialog](https://github.com/thecuriobot-debug/medialog)
 
 ---
 
