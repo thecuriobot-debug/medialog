@@ -238,6 +238,17 @@ include 'includes/header.php';
             </button>
         </div>
     </form>
+    
+    <!-- Export Data Section -->
+    <div class="settings-section">
+        <h2>📥 Export Your Data</h2>
+        <p style="color: #666; margin-bottom: 20px;">
+            Download your complete reading and watching history as CSV files. Perfect for backups or importing into other services.
+        </p>
+        <a href="export-data.php" class="btn-primary" style="display: inline-block; text-decoration: none;">
+            📊 Go to Export Page
+        </a>
+    </div>
 </div>
 
 <?php include 'includes/footer.php'; ?>
