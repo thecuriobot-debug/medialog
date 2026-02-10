@@ -391,19 +391,38 @@ $pageStyles = "
         color: white;
         margin-bottom: 15px;
         text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        text-align: center;
     }
     
     h2 {
         font-size: 1.8em;
         color: white;
-        margin: 40px 0 20px 0;
+        margin: 50px 0 25px 0;
         text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        text-align: center;
+        padding: 20px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
     }
     
     .subtitle {
         font-size: 1.2em;
         color: rgba(255,255,255,0.9);
-        margin-bottom: 30px;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+    
+    .stat-card.highlight {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+        border: 2px solid rgba(102, 126, 234, 0.3);
+    }
+    
+    .stat-card.highlight .stat-number {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.5em;
     }
     
     /* Chart Styles for Insights */
@@ -420,6 +439,7 @@ $pageStyles = "
         font-weight: 700;
         color: #1a1a1a;
         margin-bottom: 20px;
+        text-align: center;
     }
     
     .bar-chart {
@@ -471,6 +491,7 @@ $pageStyles = "
         
         h2 {
             font-size: 1.5em;
+            margin: 30px 0 20px 0;
         }
         
         .bar-label {
