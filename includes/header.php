@@ -239,9 +239,8 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
         /* Item Grid */
         .item-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, 350px);
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 30px;
-            justify-content: center;
         }
         
         .item-card {
