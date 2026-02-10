@@ -218,19 +218,26 @@ $pageStyles = "
         color: white;
         margin-bottom: 15px;
         text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        text-align: center;
     }
     
     h2 {
         font-size: 1.8em;
         color: white;
-        margin: 40px 0 20px 0;
+        margin: 50px 0 25px 0;
         text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        text-align: center;
+        padding: 20px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
     }
     
     .subtitle {
         font-size: 1.2em;
         color: rgba(255,255,255,0.9);
         margin-bottom: 30px;
+        text-align: center;
     }
     
     /* Adjust font size for large numbers */
@@ -396,7 +403,7 @@ include 'includes/header.php';
             </div>
         </div>
         
-        <h2 style="margin: 40px 0 20px 0; color: #1a1a1a;">📚 Books</h2>
+        <h2>📚 Books</h2>
         
         <div class="stats-grid">
             <div class="stat-card">
@@ -445,7 +452,7 @@ include 'includes/header.php';
             </div>
         </div>
         
-        <h2 style="margin: 40px 0 20px 0; color: #1a1a1a;">🎬 Movies</h2>
+        <h2>🎬 Movies</h2>
         
         <div class="stats-grid">
             <div class="stat-card">
@@ -558,7 +565,7 @@ include 'includes/header.php';
             </div>
         </div>
         
-        <h2 style="margin: 40px 0 20px 0; color: #1a1a1a;">📚 Book Charts</h2>
+        <h2>📚 Book Charts</h2>
         
         <div class="chart-container">
             <div class="chart-title">Book Rating Distribution</div>
