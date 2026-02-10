@@ -123,9 +123,10 @@ $pageStyles = "
     
     .item-image {
         width: 100%;
-        height: 180px;
-        object-fit: cover;
+        height: 280px;
+        object-fit: contain;
         border-radius: 12px 12px 0 0;
+        background: #f5f5f5;
     }
     
     .item-card {
