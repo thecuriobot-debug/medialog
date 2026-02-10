@@ -233,6 +233,12 @@ $pageStyles = "
         margin-bottom: 30px;
     }
     
+    /* Adjust font size for large numbers */
+    .stat-number {
+        font-size: 2em;
+        line-height: 1.1;
+    }
+    
     /* Chart Styles */
     .chart-container {
         background: white;
