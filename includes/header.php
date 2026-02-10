@@ -239,7 +239,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
         /* Item Grid */
         .item-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 30px;
         }
         
@@ -307,6 +307,18 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
         }
         
         /* Responsive */
+        @media (max-width: 1200px) {
+            .item-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .item-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+        
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
