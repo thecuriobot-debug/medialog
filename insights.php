@@ -14,7 +14,7 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get all movies
 $stmt = $pdo->query("
-    SELECT title, publish_date, description, full_content
+    SELECT title, publish_date, description, full_content, director, genres, runtime_minutes
     FROM posts 
     WHERE site_id = 6
     ORDER BY publish_date DESC
