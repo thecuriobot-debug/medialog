@@ -1,0 +1,43 @@
+# MediaLog .gitignore
+
+# Configuration files with sensitive data
+config.php
+
+# Database dumps
+*.sql
+database/dumps/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+cache/
+
+# Backup files
+*.bak
+*-old.php
+*-backup.php
+*~
+
+# User uploaded content (if any)
+uploads/
+user-data/

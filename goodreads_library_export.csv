@@ -1,0 +1,1 @@
+$(cat /mnt/user-data/uploads/goodreads_library_export.csv)
