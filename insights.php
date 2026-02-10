@@ -261,20 +261,10 @@ foreach ($movies as $movie) {
     }
 }
 
-// Get top genres (from movie descriptions/genres field)
+// Get top genres (from movie descriptions/genres field) - DISABLED: genres column doesn't exist
 $genreCounts = [];
-$stmt = $pdo->query("SELECT genres FROM posts WHERE site_id = 6 AND genres IS NOT NULL AND genres != ''");
-while ($row = $stmt->fetch()) {
-    $genres = explode(',', $row['genres']);
-    foreach ($genres as $genre) {
-        $genre = trim($genre);
-        if ($genre) {
-            $genreCounts[$genre] = ($genreCounts[$genre] ?? 0) + 1;
-        }
-    }
-}
-arsort($genreCounts);
-$topGenres = array_slice($genreCounts, 0, 10, true);
+// TODO: Extract genres from descriptions when available
+$topGenres = [];
 
 // Get yearly comparison data
 $yearlyData = [];
@@ -311,7 +301,7 @@ if ($currentYearCountViz == 0) {
 
 // Calculate max values for charts
 $maxRating = max(array_merge($ratingDistBooks, $ratingDistMovies)) ?: 1;
-$maxGenre = max($topGenres) ?: 1;
+$maxGenre = !empty($topGenres) ? max($topGenres) : 1;
 $maxYearly = 0;
 foreach ($yearlyData as $data) {
     $maxYearly = max($maxYearly, $data['books'], $data['movies']);
@@ -361,19 +351,8 @@ foreach ($movies as $movie) {
         $moviesByDirector[$director]++;
     }
     
-    // Genre analysis
-    if (!empty($movie['genres'])) {
-        $genres = explode(',', $movie['genres']);
-        foreach ($genres as $genre) {
-            $genre = trim($genre);
-            if ($genre) {
-                if (!isset($moviesByGenre[$genre])) {
-                    $moviesByGenre[$genre] = 0;
-                }
-                $moviesByGenre[$genre]++;
-            }
-        }
-    }
+    // Genre analysis - DISABLED (genres column doesn't exist)
+    // TODO: Extract genres from description when available
     
     // Decade analysis
     if (preg_match('/\b(19\d{2}|20\d{2})\b/', $movie['title'], $matches)) {
