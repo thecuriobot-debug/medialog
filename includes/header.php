@@ -239,8 +239,26 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
         /* Item Grid */
         .item-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 30px;
+        }
+        
+        @media (max-width: 1400px) {
+            .item-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 1000px) {
+            .item-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .item-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         .item-card {
@@ -307,18 +325,6 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
         }
         
         /* Responsive */
-        @media (max-width: 1200px) {
-            .item-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            }
-        }
-        
-        @media (max-width: 900px) {
-            .item-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            }
-        }
-        
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
@@ -369,10 +375,6 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             
             .container {
                 padding: 20px 15px;
-            }
-            
-            .item-grid {
-                grid-template-columns: 1fr;
             }
         }
         
