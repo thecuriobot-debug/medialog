@@ -384,6 +384,9 @@ include 'includes/header.php';
                     <a href="movies.php" style="background: rgba(255,255,255,0.25); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
                         <span>🎬</span> Browse Movies
                     </a>
+                    <a href="reviews.php" style="background: rgba(255,255,255,0.25); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <span>📝</span> Browse Reviews
+                    </a>
                     <a href="authors.php" style="background: rgba(255,255,255,0.25); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
                         <span>✍️</span> Browse Authors
                     </a>
