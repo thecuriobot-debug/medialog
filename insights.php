@@ -722,6 +722,7 @@ $pageStyles = "
         grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
         gap: 30px;
         margin-bottom: 30px;
+        margin-top: 0;
     }
     
     .viz-card {
@@ -1248,10 +1249,8 @@ include 'includes/header.php';
                 <div class="stat-label">Books Ratio</div>
             </div>
         </div>
-    
     <!-- VISUALIZATIONS SECTION -->
-    <div>
-        
+    <div style="margin-top: 40px;">
         <!-- Rating Distribution -->
         <div class="viz-grid">
             <div class="viz-card">

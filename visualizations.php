@@ -241,6 +241,19 @@ $maxYearly = $maxYearly ?: 1;
         <p style="font-size: 1.2em; color: rgba(255,255,255,0.9);">Visual insights into your reading and watching habits</p>
     </div>
     
+    <!-- Deprecation Notice -->
+    <div style="background: linear-gradient(135deg, #f093fb, #f5576c); padding: 30px; border-radius: 15px; margin-bottom: 40px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <h2 style="color: white; font-size: 1.8em; margin-bottom: 15px;">⚠️ Page Deprecated</h2>
+        <p style="color: white; font-size: 1.1em; line-height: 1.6; margin-bottom: 20px;">
+            This page has been deprecated. All visualizations are now available on the <strong>Insights</strong> page.
+        </p>
+        <a href="insights.php" style="display: inline-block; background: white; color: #f5576c; padding: 15px 40px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s;" 
+           onmouseover="this.style.transform='scale(1.05)'" 
+           onmouseout="this.style.transform='scale(1)'">
+            Go to Insights →
+        </a>
+    </div>
+    
     
     <!-- Rating Distribution -->
     <div class="viz-grid">
