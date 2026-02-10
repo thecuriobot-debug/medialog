@@ -69,6 +69,101 @@ $mostWatchedDirector = !empty($directors) ? array_key_first($directors) : null;
 $mostWatchedCount = $mostWatchedDirector ? $directors[$mostWatchedDirector]['count'] : 0;
 
 $pageTitle = "Directors";
+$pageStyles = "
+    /* Directors Page Styles */
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .page-header h1 {
+        font-size: 3em;
+        color: white;
+        margin-bottom: 15px;
+        text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    
+    .page-header p {
+        font-size: 1.2em;
+        color: rgba(255,255,255,0.9);
+    }
+    
+    .directors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+    }
+    
+    .director-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .director-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .director-header {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .director-name {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+    }
+    
+    .director-meta {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .director-movies {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .movie-item {
+        font-size: 0.95em;
+        color: #666;
+        padding: 8px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        transition: background 0.3s;
+    }
+    
+    .movie-item:hover {
+        background: #e9ecef;
+    }
+    
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2em;
+        }
+        
+        .directors-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+";
 include 'includes/header.php';
 ?>
 
