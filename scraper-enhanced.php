@@ -45,6 +45,10 @@ foreach ($movies as $movie) {
         
         // Convert to film URL (remove username if present)
         $canonicalUrl = preg_replace('/letterboxd\.com\/[^\/]+\/film/', 'letterboxd.com/film', $canonicalUrl);
+        
+        // Remove trailing /1/ or /2/ etc (review numbers)
+        $canonicalUrl = preg_replace('/\/\d+\/$/', '/', $canonicalUrl);
+        
         echo "  Resolved to: $canonicalUrl\n";
     } else {
         // Regular letterboxd.com URL
