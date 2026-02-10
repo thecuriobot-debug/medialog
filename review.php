@@ -26,6 +26,73 @@ if (!$post) {
 }
 
 $pageTitle = "Book Review";
+$pageStyles = "
+    /* Review Page Styles */
+    .review-header {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .review-header h1 {
+        font-size: 2.5em;
+        color: #1a1a1a;
+        margin-bottom: 15px;
+    }
+    
+    .meta {
+        color: #666;
+        font-size: 1.1em;
+    }
+    
+    .book-info {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .book-cover {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .book-cover img {
+        max-width: 300px;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    
+    .review-content {
+        font-size: 1.1em;
+        line-height: 1.8;
+        color: #333;
+    }
+    
+    .review-content p {
+        margin-bottom: 1.2em;
+    }
+    
+    .back-link {
+        display: inline-block;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 30px;
+        padding: 10px 20px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .back-link:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateX(-5px);
+    }
+";
 include 'includes/header.php';
 ?>
 
