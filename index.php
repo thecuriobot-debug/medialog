@@ -570,8 +570,8 @@ function cleanTitle($title, $type) {
     </nav>
     
     <div class="hero">
-        <h1>📚 Welcome Back</h1>
-        <p>Your Letterboxd + Goodreads tracker</p>
+        <h1>📚 Welcome to MediaLog</h1>
+        <p>Your complete media tracking system • 782 Books • 1,708 Movies • 14 Years of History</p>
         <div class="hero-stats">
             <div class="hero-stat">
                 <div class="hero-stat-number"><?= $totalBooks ?></div>
@@ -588,6 +588,59 @@ function cleanTitle($title, $type) {
             <div class="hero-stat">
                 <div class="hero-stat-number"><?= $moviesThisYear ?></div>
                 <div class="hero-stat-label">Movies (<?= $currentYear ?>)</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- What's New Banner -->
+    <div class="container" style="margin-top: -30px; margin-bottom: 30px;">
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+            <div style="padding: 25px;">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <div style="font-size: 2.5em;">✨</div>
+                    <div>
+                        <h2 style="color: white; margin: 0; font-size: 1.5em;">What's New in MediaLog</h2>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.95em;">Recent updates & improvements</p>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px;">
+                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 15px; border-radius: 10px;">
+                        <div style="font-size: 1.5em; margin-bottom: 8px;">📝</div>
+                        <div style="font-weight: 700; margin-bottom: 5px;">Book Reviews</div>
+                        <div style="opacity: 0.9; font-size: 0.9em;">Review badges, snippets & filter - see which books you've reviewed</div>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 15px; border-radius: 10px;">
+                        <div style="font-size: 1.5em; margin-bottom: 8px;">🎬</div>
+                        <div style="font-weight: 700; margin-bottom: 5px;">1,708 Movies</div>
+                        <div style="opacity: 0.9; font-size: 0.9em;">Complete 14-year Letterboxd history imported (2011-2025)</div>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 15px; border-radius: 10px;">
+                        <div style="font-size: 1.5em; margin-bottom: 8px;">📊</div>
+                        <div style="font-weight: 700; margin-bottom: 5px;">Combined Insights</div>
+                        <div style="opacity: 0.9; font-size: 0.9em;">New analytics: days with both, genre/director rankings, decade analysis</div>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 15px; border-radius: 10px;">
+                        <div style="font-size: 1.5em; margin-bottom: 8px;">🎨</div>
+                        <div style="font-weight: 700; margin-bottom: 5px;">Modern Design</div>
+                        <div style="opacity: 0.9; font-size: 0.9em;">Purple gradients, gold accents, enhanced cards across all pages</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 15px; flex-wrap: wrap;">
+                    <a href="insights.php" style="background: rgba(255,255,255,0.25); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <span>🔍</span> Explore Insights
+                    </a>
+                    <a href="books.php" style="background: rgba(255,255,255,0.25); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <span>📚</span> Browse Books
+                    </a>
+                    <a href="movies.php" style="background: rgba(255,255,255,0.25); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <span>🎬</span> Browse Movies
+                    </a>
+                </div>
             </div>
         </div>
     </div>

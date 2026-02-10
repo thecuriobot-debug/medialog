@@ -470,6 +470,28 @@ $topAuthorsByPages = array_slice($authorPages, 0, 10, true);
         <h1>📊 Media Statistics</h1>
         <div class="subtitle">Books & Movies by the numbers</div>
         
+        <!-- Quick Summary -->
+        <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px 25px; border-radius: 15px; margin: 30px 0; display: flex; flex-wrap: wrap; gap: 30px; align-items: center; justify-content: center;">
+            <div style="text-align: center;">
+                <div style="font-size: 2.5em; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.2);"><?= $totalBooks + $totalMovies ?></div>
+                <div style="opacity: 0.95; font-size: 0.9em; margin-top: 5px;">Total Media Items</div>
+            </div>
+            <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.3);"></div>
+            <div style="text-align: center;">
+                <div style="font-size: 2em; font-weight: 700;">📚 <?= $totalBooks ?></div>
+                <div style="opacity: 0.95; font-size: 0.9em; margin-top: 5px;">Books</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2em; font-weight: 700;">🎬 <?= $totalMovies ?></div>
+                <div style="opacity: 0.95; font-size: 0.9em; margin-top: 5px;">Movies</div>
+            </div>
+            <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.3);"></div>
+            <div style="text-align: center;">
+                <div style="font-size: 2em; font-weight: 700;"><?= date('Y') - 2011 ?> Years</div>
+                <div style="opacity: 0.95; font-size: 0.9em; margin-top: 5px;">2011-2025</div>
+            </div>
+        </div>
+        
         <h2 style="margin: 40px 0 20px 0; color: #1a1a1a;">📚 Books</h2>
         
         <div class="stats-grid">
