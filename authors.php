@@ -157,6 +157,34 @@ $pageStyles = "
         background: #e9ecef;
     }
     
+    .books-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .book-cover {
+        display: block;
+        width: 100%;
+        aspect-ratio: 2/3;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+    }
+    
+    .book-cover:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    
+    .book-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
     @media (max-width: 768px) {
         .page-header h1 {
             font-size: 2em;
@@ -164,6 +192,10 @@ $pageStyles = "
         
         .authors-grid {
             grid-template-columns: 1fr;
+        }
+        
+        .books-grid {
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
         }
     }
 ";
