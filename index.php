@@ -419,9 +419,6 @@ include 'includes/header.php';
                 </div>
                 
                 <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 15px; flex-wrap: wrap;">
-                    <a href="insights.php" style="background: rgba(255,255,255,0.25); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; font-size: 1.05em;">
-                        <span>🔍</span> Explore Insights
-                    </a>
                     <a href="books.php" style="background: rgba(255,255,255,0.25); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; font-size: 1.05em;">
                         <span>📚</span> Browse Books
                     </a>
