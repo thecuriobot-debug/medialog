@@ -212,6 +212,27 @@ $topAuthorsByPages = array_slice($authorPages, 0, 10, true);
 
 $pageTitle = "Statistics";
 $pageStyles = "
+    /* Page-specific overrides and additions */
+    h1 {
+        font-size: 3em;
+        color: white;
+        margin-bottom: 15px;
+        text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    
+    h2 {
+        font-size: 1.8em;
+        color: white;
+        margin: 40px 0 20px 0;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .subtitle {
+        font-size: 1.2em;
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 30px;
+    }
+    
     /* Chart Styles */
     .chart-container {
         background: white;
@@ -321,6 +342,14 @@ $pageStyles = "
     }
     
     @media (max-width: 768px) {
+        h1 {
+            font-size: 2em;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+        }
+        
         .bar-label {
             min-width: 80px;
             font-size: 0.85em;
