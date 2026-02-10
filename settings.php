@@ -1,53 +1,50 @@
 <?php
 require_once 'config.php';
 $pdo = getDB();
+
+// Handle form submission
 $message = '';
 $messageType = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        switch ($_POST['action']) {
-            case 'save_accounts':
-                $goodreadsUrl = trim($_POST['goodreads_url'] ?? '');
-                $letterboxdUrl = trim($_POST['letterboxd_url'] ?? '');
-                $stmt = $pdo->prepare("INSERT INTO user_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?");
-                $stmt->execute(['goodreads_url', $goodreadsUrl, $goodreadsUrl]);
-                $stmt->execute(['letterboxd_url', $letterboxdUrl, $letterboxdUrl]);
-                $message = 'Account URLs saved successfully!';
-                $messageType = 'success';
-                break;
-            case 'save_goals':
-                $year = (int)($_POST['year'] ?? date('Y'));
-                $booksGoal = (int)($_POST['books_goal'] ?? 0);
-                $moviesGoal = (int)($_POST['movies_goal'] ?? 0);
-                $pagesGoal = (int)($_POST['pages_goal'] ?? 0);
-                $stmt = $pdo->prepare("INSERT INTO user_goals (goal_type, target_value, year) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE target_value = ?");
-                $stmt->execute(['books', $booksGoal, $year, $booksGoal]);
-                $stmt->execute(['movies', $moviesGoal, $year, $moviesGoal]);
-                $stmt->execute(['pages', $pagesGoal, $year, $pagesGoal]);
-                $message = 'Goals saved successfully!';
-                $messageType = 'success';
-                break;
+    $updates = [
+        'goodreads_user_id' => $_POST['goodreads_user_id'] ?? '',
+        'letterboxd_username' => $_POST['letterboxd_username'] ?? '',
+        'reading_goal_yearly' => $_POST['reading_goal_yearly'] ?? '50',
+        'watching_goal_yearly' => $_POST['watching_goal_yearly'] ?? '100'
+    ];
+    
+    try {
+        $stmt = $pdo->prepare("INSERT INTO user_settings (user_id, setting_key, setting_value) 
+                               VALUES (1, :key, :value) 
+                               ON DUPLICATE KEY UPDATE setting_value = :value");
+        
+        foreach ($updates as $key => $value) {
+            $stmt->execute([':key' => $key, ':value' => $value]);
         }
+        
+        $message = 'Settings saved successfully!';
+        $messageType = 'success';
+    } catch (PDOException $e) {
+        $message = 'Error saving settings: ' . $e->getMessage();
+        $messageType = 'error';
     }
 }
 
+// Load current settings
 $settings = [];
-$stmt = $pdo->query("SELECT setting_key, setting_value FROM user_settings");
+$stmt = $pdo->query("SELECT setting_key, setting_value FROM user_settings WHERE user_id = 1");
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $settings[$row['setting_key']] = $row['setting_value'];
 }
 
-$currentYear = date('Y');
-$goals = [];
-$stmt = $pdo->prepare("SELECT goal_type, target_value, current_value FROM user_goals WHERE year = ?");
-$stmt->execute([$currentYear]);
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $goals[$row['goal_type']] = $row;
-}
-
 $pageTitle = "Settings";
 $pageStyles = "
+    .settings-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
     .settings-section {
         background: white;
         padding: 30px;
@@ -55,133 +52,192 @@ $pageStyles = "
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         margin-bottom: 30px;
     }
+    
     .settings-section h2 {
-        color: #1a1a1a;
+        color: #667eea;
         margin-bottom: 20px;
-        font-size: 1.5em;
         padding-bottom: 15px;
-        border-bottom: 2px solid #f0f0f0;
+        border-bottom: 2px solid #e0e0e0;
     }
+    
     .form-group {
         margin-bottom: 20px;
     }
+    
     .form-group label {
         display: block;
-        margin-bottom: 8px;
         font-weight: 600;
         color: #333;
+        margin-bottom: 8px;
     }
-    .form-group input {
+    
+    .form-group input[type='text'],
+    .form-group input[type='number'] {
         width: 100%;
         padding: 12px;
         border: 2px solid #e0e0e0;
         border-radius: 8px;
         font-size: 14px;
+        transition: border-color 0.3s;
     }
+    
     .form-group input:focus {
         outline: none;
         border-color: #667eea;
     }
-    .form-group small {
-        display: block;
-        margin-top: 5px;
-        color: #666;
+    
+    .form-help {
         font-size: 0.85em;
+        color: #666;
+        margin-top: 5px;
     }
-    .btn {
-        padding: 12px 30px;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-    }
+    
     .btn-primary {
         background: linear-gradient(135deg, #667eea, #764ba2);
         color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
     }
-    .alert {
-        padding: 15px 20px;
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .message {
+        padding: 15px;
         border-radius: 8px;
         margin-bottom: 20px;
+        font-weight: 500;
     }
-    .alert-success {
+    
+    .message.success {
         background: #d4edda;
         color: #155724;
+        border: 1px solid #c3e6cb;
     }
-    .alert-info {
-        background: #d1ecf1;
-        color: #0c5460;
+    
+    .message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
     }
-    .goal-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
+    
+    .import-info {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        margin-top: 10px;
+    }
+    
+    .import-info h4 {
+        margin: 0 0 10px 0;
+        color: #667eea;
+    }
+    
+    .import-info p {
+        margin: 5px 0;
+        font-size: 0.9em;
+        line-height: 1.6;
     }
 ";
+
 include 'includes/header.php';
 ?>
 
-<div class="container">
+<div class="container settings-container">
     <div class="page-header" style="text-align: center; margin-bottom: 40px;">
         <h1 style="font-size: 3em; color: white; margin-bottom: 15px;">⚙️ Settings</h1>
-        <p style="font-size: 1.2em; color: rgba(255,255,255,0.9);">Configure your MediaLog</p>
+        <p style="font-size: 1.2em; color: rgba(255,255,255,0.9);">Manage your MediaLog preferences</p>
     </div>
     
     <?php if ($message): ?>
-        <div class="alert alert-<?= $messageType ?>">
-            <?= htmlspecialchars($message) ?>
+        <div class="message <?php echo $messageType; ?>">
+            <?php echo htmlspecialchars($message); ?>
         </div>
     <?php endif; ?>
     
-    <div class="settings-section">
-        <h2>📚 Account Integration</h2>
-        <div class="alert alert-info">
-            <strong>Note:</strong> Enter your Goodreads and Letterboxd profile URLs.
+    <form method="POST" action="">
+        <!-- Import Settings -->
+        <div class="settings-section">
+            <h2>📚 Import Sources</h2>
+            
+            <div class="form-group">
+                <label for="goodreads_user_id">Goodreads User ID</label>
+                <input type="text" 
+                       id="goodreads_user_id" 
+                       name="goodreads_user_id" 
+                       value="<?php echo htmlspecialchars($settings['goodreads_user_id'] ?? ''); ?>"
+                       placeholder="12345678">
+                <div class="form-help">
+                    Find your Goodreads ID by visiting your profile page. The number in the URL is your User ID.
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="letterboxd_username">Letterboxd Username</label>
+                <input type="text" 
+                       id="letterboxd_username" 
+                       name="letterboxd_username" 
+                       value="<?php echo htmlspecialchars($settings['letterboxd_username'] ?? ''); ?>"
+                       placeholder="yourusername">
+                <div class="form-help">
+                    Your Letterboxd username (not email). This appears in your profile URL.
+                </div>
+            </div>
+            
+            <div class="import-info">
+                <h4>🔄 How Import Works</h4>
+                <p><strong>Goodreads:</strong> We'll fetch your reading history using the Goodreads RSS feed.</p>
+                <p><strong>Letterboxd:</strong> We'll import your films from your public Letterboxd profile.</p>
+                <p><em>Note: Imports are currently manual. Automatic sync coming soon!</em></p>
+            </div>
         </div>
-        <form method="POST">
-            <input type="hidden" name="action" value="save_accounts">
+        
+        <!-- Personal Goals -->
+        <div class="settings-section">
+            <h2>🎯 Personal Goals</h2>
+            
             <div class="form-group">
-                <label>Goodreads Profile URL</label>
-                <input type="url" name="goodreads_url" value="<?= htmlspecialchars($settings['goodreads_url'] ?? '') ?>" 
-                       placeholder="https://www.goodreads.com/user/show/12345-username">
-                <small>Example: https://www.goodreads.com/user/show/12345-username</small>
+                <label for="reading_goal_yearly">Yearly Reading Goal</label>
+                <input type="number" 
+                       id="reading_goal_yearly" 
+                       name="reading_goal_yearly" 
+                       value="<?php echo htmlspecialchars($settings['reading_goal_yearly'] ?? '50'); ?>"
+                       min="1"
+                       max="1000">
+                <div class="form-help">
+                    How many books do you want to read this year?
+                </div>
             </div>
+            
             <div class="form-group">
-                <label>Letterboxd Profile URL</label>
-                <input type="url" name="letterboxd_url" value="<?= htmlspecialchars($settings['letterboxd_url'] ?? '') ?>" 
-                       placeholder="https://letterboxd.com/username">
-                <small>Example: https://letterboxd.com/username</small>
-            </div>
-            <button type="submit" class="btn btn-primary">💾 Save URLs</button>
-        </form>
-    </div>
-    
-    <div class="settings-section">
-        <h2>🎯 <?= $currentYear ?> Goals</h2>
-        <form method="POST">
-            <input type="hidden" name="action" value="save_goals">
-            <input type="hidden" name="year" value="<?= $currentYear ?>">
-            <div class="goal-grid">
-                <div class="form-group">
-                    <label>📚 Books Goal</label>
-                    <input type="number" name="books_goal" value="<?= $goals['books']['target_value'] ?? 0 ?>" min="0">
-                    <small>Current: <?= $goals['books']['current_value'] ?? 0 ?></small>
-                </div>
-                <div class="form-group">
-                    <label>🎬 Movies Goal</label>
-                    <input type="number" name="movies_goal" value="<?= $goals['movies']['target_value'] ?? 0 ?>" min="0">
-                    <small>Current: <?= $goals['movies']['current_value'] ?? 0 ?></small>
-                </div>
-                <div class="form-group">
-                    <label>📖 Pages Goal</label>
-                    <input type="number" name="pages_goal" value="<?= $goals['pages']['target_value'] ?? 0 ?>" min="0">
-                    <small>Current: <?= $goals['pages']['current_value'] ?? 0 ?></small>
+                <label for="watching_goal_yearly">Yearly Watching Goal</label>
+                <input type="number" 
+                       id="watching_goal_yearly" 
+                       name="watching_goal_yearly" 
+                       value="<?php echo htmlspecialchars($settings['watching_goal_yearly'] ?? '100'); ?>"
+                       min="1"
+                       max="1000">
+                <div class="form-help">
+                    How many movies do you want to watch this year?
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">🎯 Save Goals</button>
-        </form>
-    </div>
+        </div>
+        
+        <!-- Save Button -->
+        <div style="text-align: center; margin-top: 30px;">
+            <button type="submit" class="btn-primary">
+                💾 Save Settings
+            </button>
+        </div>
+    </form>
 </div>
 
 <?php include 'includes/footer.php'; ?>
