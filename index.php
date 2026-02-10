@@ -204,7 +204,7 @@ $pageStyles = "
     
     /* Hero Section - Index Page Only */
     .hero {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(102, 126, 234, 0.2));
         backdrop-filter: blur(20px);
         padding: 60px 30px;
         margin: 0 auto 40px;
