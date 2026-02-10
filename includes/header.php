@@ -10,6 +10,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><?php echo isset($pageTitle) ? $pageTitle . ' - MediaLog' : 'MediaLog - Your Letterboxd + Goodreads Tracker'; ?></title>
+    <link rel="stylesheet" href="includes/shared-styles.css">
     <style>
         * {
             margin: 0;
