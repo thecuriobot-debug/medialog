@@ -133,8 +133,6 @@ $pageStyles = "
     
     .item-card {
         transition: all 0.3s ease;
-        max-width: 350px;
-        margin: 0 auto;
     }
     
     .item-card:hover {
