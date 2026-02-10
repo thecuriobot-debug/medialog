@@ -184,18 +184,20 @@ if (in_array($today, $allDates) || in_array($yesterday, $allDates)) {
         }
         
         body {
-            font-family: 'Georgia', 'Times New Roman', serif;
-            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             color: #1a1a1a;
         }
         
         .top-nav {
-            background: #1a1a1a;
-            border-bottom: 3px solid #d4af37;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
         
         .nav-container {
@@ -208,12 +210,15 @@ if (in_array($today, $allDates) || in_array($yesterday, $allDates)) {
         }
         
         .nav-brand {
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 28px;
+            font-weight: 800;
             color: #d4af37;
-            padding: 15px 0;
+            padding: 20px 0;
             text-decoration: none;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #d4af37, #f4d483);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .nav-links {
@@ -224,41 +229,60 @@ if (in_array($today, $allDates) || in_array($yesterday, $allDates)) {
         
         .nav-links a {
             display: block;
-            padding: 20px;
-            color: #fff;
+            padding: 20px 18px;
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 600;
             transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
+            border-bottom: 2px solid transparent;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
         
         .nav-links a:hover, .nav-links a.active {
-            background: #2a2a2a;
+            color: #d4af37;
             border-bottom-color: #d4af37;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 40px 20px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .page-header h1 {
+            font-size: 3em;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .page-header p {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.9);
         }
         
         h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
+            color: white;
         }
         
         h2 {
             font-size: 2em;
             margin: 40px 0 20px 0;
-            color: #1a1a1a;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .subtitle {
-            color: #666;
+            color: rgba(255,255,255,0.9);
             margin-bottom: 40px;
             font-size: 1.1em;
         }
@@ -272,14 +296,20 @@ if (in_array($today, $allDates) || in_array($yesterday, $allDates)) {
         
         .stat-card {
             background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
         
         .stat-card.highlight {
-            background: linear-gradient(135deg, #d4af37 0%, #f4d483 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
         
@@ -308,9 +338,9 @@ if (in_array($today, $allDates) || in_array($yesterday, $allDates)) {
         .chart-container {
             background: white;
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
         }
         
         .chart-title {
