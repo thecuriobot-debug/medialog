@@ -209,14 +209,12 @@ $topAuthors = array_slice($authors, 0, 10, true);
 // Top authors by pages
 arsort($authorPages);
 $topAuthorsByPages = array_slice($authorPages, 0, 10, true);
-?>
-<?php
+
 $pageTitle = "Statistics";
 include 'includes/header.php';
 ?>
 
-    
-    <div class="container">
+<div class="container">
         <h1>📊 Media Statistics</h1>
         <div class="subtitle">Books & Movies by the numbers</div>
         

@@ -67,14 +67,12 @@ $totalDirectors = count($directors);
 $avgMoviesPerDirector = $totalDirectors > 0 ? round(array_sum(array_map(function($d) { return $d['count']; }, $directors)) / $totalDirectors, 1) : 0;
 $mostWatchedDirector = !empty($directors) ? array_key_first($directors) : null;
 $mostWatchedCount = $mostWatchedDirector ? $directors[$mostWatchedDirector]['count'] : 0;
-?>
-<?php
+
 $pageTitle = "Directors";
 include 'includes/header.php';
 ?>
 
-    
-    <div class="container">
+<div class="container">
         <!-- Header -->
         <div class="page-header">
             <h1>🎬 Directors</h1>

@@ -28,14 +28,12 @@ preg_match('/(.*?), (\d{4})(?: - (.+))?/', $movie['title'], $matches);
 $movieTitle = $matches[1] ?? $movie['title'];
 $year = $matches[2] ?? '';
 $rating = $matches[3] ?? '';
-?>
-<?php
+
 $pageTitle = "Movie";
 include 'includes/header.php';
 ?>
 
-    
-    <div class="container">
+<div class="container">
         <a href="movies.php" class="back-link">← Back to Movies</a>
         
         <div class="movie-header">

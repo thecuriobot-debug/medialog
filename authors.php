@@ -70,14 +70,12 @@ $totalAuthors = count($authors);
 $avgBooksPerAuthor = $totalAuthors > 0 ? round(array_sum(array_map(function($a) { return count($a['books']); }, $authors)) / $totalAuthors, 1) : 0;
 $mostReadAuthor = array_key_first($authors);
 $mostReadCount = count($authors[$mostReadAuthor]['books']);
-?>
-<?php
+
 $pageTitle = "Authors";
 include 'includes/header.php';
 ?>
 
-    
-    <div class="container">
+<div class="container">
         <!-- Header -->
         <div class="page-header">
             <h1>📚 Authors</h1>

@@ -24,13 +24,12 @@ $post = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$post) {
     die('Review not found');
 }
-?>
-<?php
+
 $pageTitle = "Book Review";
 include 'includes/header.php';
 ?>
 
-    <div class="container">
+<div class="container">
         <a href="index.php" class="back-link">← Back to MediaLog</a>
         
         <div class="review-header">

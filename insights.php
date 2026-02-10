@@ -382,14 +382,12 @@ foreach ($moviesByRating as $stars => $count) {
     }
 }
 $avgMovieRating = $totalMovieRatings > 0 ? round($avgMovieRating / $totalMovieRatings, 2) : 0;
-?>
-<?php
+
 $pageTitle = "Insights";
 include 'includes/header.php';
 ?>
 
-    
-    <div class="container">
+<div class="container">
         <h1>📊 Advanced Insights</h1>
         <div class="subtitle">Deep analytics on your media consumption patterns</div>
         
