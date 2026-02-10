@@ -125,9 +125,10 @@ $pageStyles = "
     
     .item-image {
         width: 100%;
-        height: 180px;
-        object-fit: cover;
+        height: 280px;
+        object-fit: contain;
         border-radius: 12px 12px 0 0;
+        background: #f8f9fa;
     }
     
     .item-card {
@@ -267,6 +268,16 @@ include 'includes/header.php';
                             <?php endif; ?>
                             <span style="color: #999;">Watched: <?php echo $date; ?></span>
                         </p>
+                        
+                        <?php if (!empty($movie['description'])): 
+                            $description = strip_tags($movie['description']);
+                            $snippet = mb_strlen($description) > 120 ? mb_substr($description, 0, 120) . '...' : $description;
+                        ?>
+                            <p style="color: #666; font-size: 0.9em; line-height: 1.5; margin-top: 10px; font-style: italic;">
+                                "<?php echo htmlspecialchars($snippet); ?>"
+                            </p>
+                        <?php endif; ?>
+                        
                         <?php if (!empty($genres)): ?>
                             <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px;">
                                 <?php foreach (array_slice($genres, 0, 3) as $g): ?>
