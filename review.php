@@ -28,11 +28,13 @@ if (!$post) {
 $pageTitle = "Book Review";
 $pageStyles = "
     /* Review Page Styles */
-    .review-container {
+    .container .review-container {
         background: white !important;
-        padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        background-color: white !important;
+        padding: 40px !important;
+        border-radius: 15px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+        border: 3px solid red !important; /* DEBUG: Make it visible */
     }
     
     .back-link {
@@ -114,6 +116,35 @@ include 'includes/header.php';
 ?>
 
 <div class="container">
+    <style>
+        .review-container {
+            background: white !important;
+            background-color: #ffffff !important;
+            padding: 40px !important;
+            border-radius: 15px !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+        }
+        .back-link {
+            display: inline-block;
+            color: #667eea !important;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            background: #f8f9fa !important;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+        .review-header {
+            padding-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 30px;
+        }
+        .review-header h1 {
+            font-size: 2.5em;
+            color: #1a1a1a;
+        }
+    </style>
     <div class="review-container">
         <a href="index.php" class="back-link">← Back to MediaLog</a>
         
