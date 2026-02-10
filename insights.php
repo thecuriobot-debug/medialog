@@ -385,6 +385,190 @@ $avgMovieRating = $totalMovieRatings > 0 ? round($avgMovieRating / $totalMovieRa
 ?>
 <?php
 $pageTitle = "Insights";
+$pageStyles = "
+    /* Page-specific overrides and additions */
+    h1 {
+        font-size: 3em;
+        color: white;
+        margin-bottom: 15px;
+        text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        text-align: center;
+    }
+    
+    h2 {
+        font-size: 1.8em;
+        color: white;
+        margin: 50px 0 25px 0;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        text-align: center;
+        padding: 20px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .subtitle {
+        font-size: 1.2em;
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 40px;
+        text-align: center;
+    }
+    
+    .stat-card.highlight {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+        border: 2px solid rgba(102, 126, 234, 0.3);
+    }
+    
+    .stat-card.highlight .stat-number {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.5em;
+    }
+    
+    /* Chart and Container Styles */
+    .chart-container {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .chart-container h3 {
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        font-size: 1.3em;
+    }
+    
+    .chart-title {
+        font-size: 1.5em;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .bar-chart {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .bar-label {
+        min-width: 120px;
+        font-weight: 600;
+        color: #666;
+        font-size: 0.95em;
+    }
+    
+    .bar-track {
+        flex: 1;
+        background: #e0e0e0;
+        border-radius: 8px;
+        height: 35px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .bar-fill {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        height: 100%;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+        color: white;
+        font-weight: 700;
+        font-size: 0.9em;
+        transition: width 0.5s ease;
+        min-width: fit-content;
+    }
+    
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .insight-box {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .insight-box h3 {
+        color: #1a1a1a;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+    }
+    
+    .insight-box p {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+    
+    .month-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .month-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .month-label {
+        font-size: 0.85em;
+        color: #666;
+        margin-bottom: 8px;
+    }
+    
+    .month-count {
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 2em;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+            margin: 30px 0 20px 0;
+        }
+        
+        .bar-label {
+            min-width: 80px;
+            font-size: 0.85em;
+        }
+        
+        .bar-fill {
+            font-size: 0.8em;
+            padding: 0 10px;
+        }
+        
+        .comparison-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+";
 include 'includes/header.php';
 ?>
 
