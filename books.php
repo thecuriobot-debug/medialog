@@ -131,11 +131,17 @@ $pageStyles = "
     
     .item-card {
         transition: all 0.3s ease;
+        max-width: 350px;
+        margin: 0 auto;
     }
     
     .item-card:hover {
         transform: translateY(-8px);
         box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    }
+    
+    .item-content {
+        padding: 20px;
     }
 ";
 include 'includes/header.php';
@@ -220,7 +226,7 @@ include 'includes/header.php';
             </div>
             
             <div style="display: flex; align-items: flex-end;">
-                <button type="submit" style="width: 100%; padding: 10px 20px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                <button type="submit" style="width: 100%; padding: 10px 20px; background: linear-gradient(135deg, #667eea, #667eea); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
                     Apply Filters
                 </button>
             </div>
@@ -258,7 +264,7 @@ include 'includes/header.php';
                             <?php endif; ?>
                         </div>
                     <?php else: ?>
-                        <div class="item-image" style="background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 3em; position: relative;">
+                        <div class="item-image" style="background: linear-gradient(135deg, #667eea, #667eea); display: flex; align-items: center; justify-content: center; color: white; font-size: 3em; position: relative;">
                             📚
                             <?php if ($hasReviewContent): ?>
                                 <div style="position: absolute; top: 10px; right: 10px; background: rgba(25, 135, 84, 0.95); color: white; padding: 8px 12px; border-radius: 20px; font-size: 0.35em; font-weight: 600;">
