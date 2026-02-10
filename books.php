@@ -102,6 +102,41 @@ function getItemId($url) {
 }
 
 $pageTitle = "Books";
+$pageStyles = "
+    /* Books Page Styles */
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .page-header h1 {
+        font-size: 3em;
+        color: white;
+        margin-bottom: 15px;
+        text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    
+    .page-header p {
+        font-size: 1.2em;
+        color: rgba(255,255,255,0.9);
+    }
+    
+    .item-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .item-card {
+        transition: all 0.3s ease;
+    }
+    
+    .item-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    }
+";
 include 'includes/header.php';
 ?>
 
