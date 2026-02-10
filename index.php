@@ -129,6 +129,21 @@ $stmt = $pdo->query("
 ");
 $moviesThisYear = $stmt->fetch()['count'];
 
+// Get reviews count (items with content/reviews)
+$stmt = $pdo->query("
+    SELECT COUNT(*) as count FROM posts 
+    WHERE site_id = 7 AND (full_content IS NOT NULL AND full_content != '')
+");
+$booksWithReviews = $stmt->fetch()['count'];
+
+$stmt = $pdo->query("
+    SELECT COUNT(*) as count FROM posts 
+    WHERE site_id = 6 AND (description IS NOT NULL AND description != '' AND LENGTH(description) > 100)
+");
+$moviesWithReviews = $stmt->fetch()['count'];
+
+$totalReviews = $booksWithReviews + $moviesWithReviews;
+
 // Helper function to extract movie/book ID from URL
 function getItemId($url, $type) {
     if ($type === 'book') {
@@ -199,7 +214,7 @@ include 'includes/header.php';
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 20px;
-        max-width: 800px;
+        max-width: 1000px;
         margin: 0 auto;
     }
     
@@ -296,7 +311,7 @@ include 'includes/header.php';
 
 <div class="hero">
         <h1>📚 Welcome to MediaLog</h1>
-        <p>Your complete media tracking system • 782 Books • 1,708 Movies • 14 Years of History</p>
+        <p>Your complete media tracking system • <?= $totalBooks ?> Books • <?= $totalMovies ?> Movies • <?= $totalReviews ?> Reviews</p>
         <div class="hero-stats">
             <div class="hero-stat">
                 <div class="hero-stat-number"><?= $totalBooks ?></div>
@@ -305,6 +320,10 @@ include 'includes/header.php';
             <div class="hero-stat">
                 <div class="hero-stat-number"><?= $totalMovies ?></div>
                 <div class="hero-stat-label">Total Movies</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-number"><?= $totalReviews ?></div>
+                <div class="hero-stat-label">Reviews Written</div>
             </div>
             <div class="hero-stat">
                 <div class="hero-stat-number"><?= $booksThisYear ?></div>
@@ -364,6 +383,12 @@ include 'includes/header.php';
                     </a>
                     <a href="movies.php" style="background: rgba(255,255,255,0.25); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
                         <span>🎬</span> Browse Movies
+                    </a>
+                    <a href="authors.php" style="background: rgba(255,255,255,0.25); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <span>✍️</span> Browse Authors
+                    </a>
+                    <a href="directors.php" style="background: rgba(255,255,255,0.25); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <span>🎥</span> Browse Directors
                     </a>
                 </div>
             </div>
