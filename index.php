@@ -441,7 +441,7 @@ include 'includes/header.php';
     
     <div class="container">
         <div class="grid">
-            <!-- Column 1: On This Day -->
+            <!-- Column 1: On This Day + Random Picks -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">📅 On This Day</h2>
@@ -460,7 +460,10 @@ include 'includes/header.php';
                         <p>Nothing consumed on this date in previous years</p>
                     </div>
                 <?php else: ?>
-                    <?php foreach ($onThisDay as $item): 
+                    <?php 
+                    $onThisDayCount = count($onThisDay);
+                    $displayCount = min($onThisDayCount, 4);
+                    foreach (array_slice($onThisDay, 0, $displayCount) as $item): 
                         $itemId = getItemId($item['url'], $item['type']);
                         $stars = getStars($item['title']);
                         $cleanedTitle = cleanTitle($item['title'], $item['type']);
@@ -484,31 +487,57 @@ include 'includes/header.php';
                         </a>
                     <?php endforeach; ?>
                 <?php endif; ?>
+                
+                <!-- Random Picks in same column -->
+                <div style="margin-top: 30px; padding-top: 25px; border-top: 2px solid #f0f0f0;">
+                    <div class="card-header" style="margin-bottom: 15px;">
+                        <h2 class="card-title">🎲 Random Picks</h2>
+                        <span class="card-icon">✨</span>
+                    </div>
+                    
+                    <?php 
+                    // Adjust random picks count based on "On This Day" count
+                    $randomCount = $onThisDayCount <= 2 ? 4 : ($onThisDayCount <= 4 ? 3 : 2);
+                    foreach (array_slice($randomItems, 0, $randomCount) as $item): 
+                        $itemId = getItemId($item['url'], $item['type']);
+                        $stars = getStars($item['title']);
+                        $cleanedTitle = cleanTitle($item['title'], $item['type']);
+                        $year = date('Y', strtotime($item['publish_date']));
+                        $link = $item['type'] === 'book' ? "review.php?id={$itemId}" : "movie.php?id={$itemId}";
+                    ?>
+                        <a href="<?= $link ?>" class="media-item">
+                            <?php if ($item['image_url']): ?>
+                                <img src="<?= htmlspecialchars($item['image_url']) ?>" 
+                                     alt="<?= htmlspecialchars($cleanedTitle) ?>" 
+                                     class="media-poster">
+                            <?php endif; ?>
+                            <div class="media-info">
+                                <div class="media-title"><?= htmlspecialchars($cleanedTitle) ?></div>
+                                <div class="media-meta"><?= $year ?></div>
+                                <?php if ($stars > 0): ?>
+                                    <div class="media-stars"><?= str_repeat('★', $stars) ?></div>
+                                <?php endif; ?>
+                                <span class="badge badge-<?= $item['type'] ?>"><?= $item['type'] ?></span>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
             </div>
             
-            <!-- Column 2: Recent Activity -->
+            <!-- Column 2: Recent Books -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">⚡ Recent Activity</h2>
-                    <span class="card-icon">🔥</span>
+                    <h2 class="card-title">📚 Recent Books</h2>
+                    <span class="card-icon">📖</span>
                 </div>
                 
                 <?php 
-                $recent = array_merge(
-                    array_slice($recentBooks, 0, 3),
-                    array_slice($recentMovies, 0, 3)
-                );
-                usort($recent, function($a, $b) {
-                    return strtotime($b['publish_date']) - strtotime($a['publish_date']);
-                });
-                $recent = array_slice($recent, 0, 6);
-                
-                foreach ($recent as $item): 
+                foreach (array_slice($recentBooks, 0, 6) as $item): 
                     $itemId = getItemId($item['url'], $item['type']);
                     $stars = getStars($item['title']);
                     $cleanedTitle = cleanTitle($item['title'], $item['type']);
                     $timeAgo = date('M j', strtotime($item['publish_date']));
-                    $link = $item['type'] === 'book' ? "review.php?id={$itemId}" : "movie.php?id={$itemId}";
+                    $link = "review.php?id={$itemId}";
                 ?>
                     <a href="<?= $link ?>" class="media-item">
                         <?php if ($item['image_url']): ?>
@@ -528,19 +557,20 @@ include 'includes/header.php';
                 <?php endforeach; ?>
             </div>
             
-            <!-- Column 3: Random Discoveries -->
+            <!-- Column 3: Recent Movies -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">🎲 Random Picks</h2>
-                    <span class="card-icon">✨</span>
+                    <h2 class="card-title">🎬 Recent Movies</h2>
+                    <span class="card-icon">🍿</span>
                 </div>
                 
-                <?php foreach ($randomItems as $item): 
+                <?php 
+                foreach (array_slice($recentMovies, 0, 6) as $item): 
                     $itemId = getItemId($item['url'], $item['type']);
                     $stars = getStars($item['title']);
                     $cleanedTitle = cleanTitle($item['title'], $item['type']);
-                    $year = date('Y', strtotime($item['publish_date']));
-                    $link = $item['type'] === 'book' ? "review.php?id={$itemId}" : "movie.php?id={$itemId}";
+                    $timeAgo = date('M j', strtotime($item['publish_date']));
+                    $link = "movie.php?id={$itemId}";
                 ?>
                     <a href="<?= $link ?>" class="media-item">
                         <?php if ($item['image_url']): ?>
@@ -550,7 +580,7 @@ include 'includes/header.php';
                         <?php endif; ?>
                         <div class="media-info">
                             <div class="media-title"><?= htmlspecialchars($cleanedTitle) ?></div>
-                            <div class="media-meta"><?= $year ?></div>
+                            <div class="media-meta"><?= $timeAgo ?></div>
                             <?php if ($stars > 0): ?>
                                 <div class="media-stars"><?= str_repeat('★', $stars) ?></div>
                             <?php endif; ?>
