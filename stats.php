@@ -275,10 +275,14 @@ $pageStyles = "
     }
     
     .bar-label {
-        min-width: 120px;
+        width: 200px;
+        min-width: 200px;
         font-weight: 600;
         color: #666;
         font-size: 0.95em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     
     .bar-track {
@@ -364,7 +368,8 @@ $pageStyles = "
         }
         
         .bar-label {
-            min-width: 80px;
+            width: 120px;
+            min-width: 120px;
             font-size: 0.85em;
         }
         
