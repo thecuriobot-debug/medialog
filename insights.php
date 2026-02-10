@@ -384,6 +384,65 @@ foreach ($moviesByRating as $stars => $count) {
 $avgMovieRating = $totalMovieRatings > 0 ? round($avgMovieRating / $totalMovieRatings, 2) : 0;
 
 $pageTitle = "Insights";
+$pageStyles = "
+    /* Chart Styles for Insights */
+    .chart-container {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .chart-title {
+        font-size: 1.5em;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+    }
+    
+    .bar-chart {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .bar-label {
+        min-width: 120px;
+        font-weight: 600;
+        color: #666;
+        font-size: 0.95em;
+    }
+    
+    .bar-track {
+        flex: 1;
+        background: #e0e0e0;
+        border-radius: 8px;
+        height: 35px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .bar-fill {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        height: 100%;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+        color: white;
+        font-weight: 700;
+        font-size: 0.9em;
+        transition: width 0.5s ease;
+        min-width: fit-content;
+    }
+";
 include 'includes/header.php';
 ?>
 

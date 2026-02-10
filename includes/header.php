@@ -346,6 +346,9 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Page-specific styles */
+        <?php if (isset($pageStyles)) echo $pageStyles; ?>
     </style>
 </head>
 <body>

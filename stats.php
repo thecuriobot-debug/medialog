@@ -211,6 +211,127 @@ arsort($authorPages);
 $topAuthorsByPages = array_slice($authorPages, 0, 10, true);
 
 $pageTitle = "Statistics";
+$pageStyles = "
+    /* Chart Styles */
+    .chart-container {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .chart-title {
+        font-size: 1.5em;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+    }
+    
+    .bar-chart {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .bar-label {
+        min-width: 120px;
+        font-weight: 600;
+        color: #666;
+        font-size: 0.95em;
+    }
+    
+    .bar-track {
+        flex: 1;
+        background: #e0e0e0;
+        border-radius: 8px;
+        height: 35px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .bar-fill {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        height: 100%;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+        color: white;
+        font-weight: 700;
+        font-size: 0.9em;
+        transition: width 0.5s ease;
+        min-width: fit-content;
+    }
+    
+    .horizontal-chart {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-around;
+        height: 250px;
+        gap: 15px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+    }
+    
+    .column-bar {
+        width: 100%;
+        background: linear-gradient(180deg, #667eea, #764ba2);
+        border-radius: 8px 8px 0 0;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .column-bar:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .column-value {
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-weight: 700;
+        color: #1a1a1a;
+        font-size: 0.9em;
+    }
+    
+    .column-label {
+        font-size: 0.85em;
+        color: #666;
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+        .bar-label {
+            min-width: 80px;
+            font-size: 0.85em;
+        }
+        
+        .bar-fill {
+            font-size: 0.8em;
+            padding: 0 10px;
+        }
+    }
+";
 include 'includes/header.php';
 ?>
 
