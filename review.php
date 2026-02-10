@@ -29,7 +29,7 @@ $pageTitle = "Book Review";
 $pageStyles = "
     /* Review Page Styles */
     .review-container {
-        background: white;
+        background: white !important;
         padding: 40px;
         border-radius: 15px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
