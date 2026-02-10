@@ -263,9 +263,9 @@ include 'includes/header.php';
                         <img src="<?php echo htmlspecialchars($movie['image_url']); ?>" 
                              alt="<?php echo htmlspecialchars($title); ?>" 
                              class="item-image"
-                             onerror="this.src='https://via.placeholder.com/300x400/c2185b/ffffff?text=No+Poster'">
+                             onerror="this.src='https://via.placeholder.com/300x400/667eea/ffffff?text=No+Poster'">
                     <?php else: ?>
-                        <div class="item-image" style="background: linear-gradient(135deg, #c2185b, #e91e63); display: flex; align-items: center; justify-content: center; color: white; font-size: 3em;">
+                        <div class="item-image" style="background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 3em;">
                             🎬
                         </div>
                     <?php endif; ?>
@@ -280,13 +280,19 @@ include 'includes/header.php';
                             <span style="color: #999;">Watched: <?php echo $date; ?></span>
                         </p>
                         
-                        <?php if (!empty($movie['description'])): 
-                            $description = strip_tags($movie['description']);
-                            $snippet = mb_strlen($description) > 120 ? mb_substr($description, 0, 120) . '...' : $description;
-                        ?>
-                            <p style="color: #666; font-size: 0.9em; line-height: 1.5; margin-top: 10px; font-style: italic; max-width: 100%; overflow-wrap: break-word;">
-                                "<?php echo htmlspecialchars($snippet); ?>"
-                            </p>
+                        <?php if (!empty($movie['description'])): ?>
+                            <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border-left: 3px solid #667eea; border-radius: 4px;">
+                                <div style="font-size: 0.75em; color: #667eea; font-weight: 600; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    🎬 My Review
+                                </div>
+                                <p style="font-size: 0.9em; color: #495057; line-height: 1.6; margin: 0;">
+                                    <?php 
+                                    $reviewSnippet = strip_tags($movie['description']);
+                                    $reviewSnippet = preg_replace('/\s+/', ' ', $reviewSnippet);
+                                    echo htmlspecialchars(mb_substr($reviewSnippet, 0, 150)); 
+                                    ?>...
+                                </p>
+                            </div>
                         <?php endif; ?>
                         
                         <?php if (!empty($genres)): ?>
