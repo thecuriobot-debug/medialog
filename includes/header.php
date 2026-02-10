@@ -49,6 +49,8 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             align-items: center;
             justify-content: space-between;
             padding: 0 30px;
+            gap: 30px;
+            flex-wrap: wrap;
         }
         
         .nav-brand {
@@ -61,12 +63,63 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             background: linear-gradient(135deg, #d4af37, #f4d483);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            flex-shrink: 0;
+        }
+        
+        .nav-search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+            min-width: 200px;
+        }
+        
+        .nav-search-input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            border-radius: 25px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-search-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .nav-search-input:focus {
+            background: rgba(255,255,255,0.1);
+            border-color: #d4af37;
+        }
+        
+        .nav-search-button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #d4af37, #f4d483);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-search-button:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 2px 10px rgba(212, 175, 55, 0.4);
         }
         
         .nav-links {
             display: flex;
             list-style: none;
             gap: 5px;
+            flex-shrink: 0;
         }
         
         .nav-links a {
@@ -79,6 +132,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             text-transform: uppercase;
             letter-spacing: 1px;
             border-bottom: 2px solid transparent;
+            white-space: nowrap;
         }
         
         .nav-links a:hover, .nav-links a.active {
@@ -239,10 +293,32 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             .nav-container {
                 flex-direction: column;
                 padding: 15px;
+                gap: 15px;
             }
             
             .nav-brand {
                 font-size: 24px;
+                padding: 10px 0;
+            }
+            
+            .nav-search-container {
+                width: 100%;
+                max-width: 100%;
+                order: 2;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0;
+                order: 3;
+                width: 100%;
+            }
+            
+            .nav-links a {
+                padding: 12px 12px;
+                font-size: 11px;
+            }
                 padding: 15px 0 10px;
             }
             
@@ -275,14 +351,25 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
     <nav class="top-nav">
         <div class="nav-container">
             <a href="index.php" class="nav-brand">MEDIALOG</a>
+            
+            <!-- Integrated Search Box -->
+            <div class="nav-search-container">
+                <form action="search.php" method="GET">
+                    <input type="text" 
+                           name="q" 
+                           class="nav-search-input" 
+                           placeholder="Search books, movies, authors, directors..." 
+                           value="<?php echo isset($_GET['q']) ? htmlspecialchars($_GET['q']) : ''; ?>"
+                           autocomplete="off">
+                    <button type="submit" class="nav-search-button">🔍</button>
+                </form>
+            </div>
+            
             <div class="nav-links">
-                <a href="index.php" class="<?php echo $currentPage == 'index' ? 'active' : ''; ?>">Dashboard</a>
-                <a href="search.php" class="<?php echo $currentPage == 'search' ? 'active' : ''; ?>">🔍 Search</a>
+                <a href="index.php" class="<?php echo $currentPage == 'index' ? 'active' : ''; ?>">Home</a>
                 <a href="books.php" class="<?php echo $currentPage == 'books' ? 'active' : ''; ?>">Books</a>
                 <a href="movies.php" class="<?php echo $currentPage == 'movies' ? 'active' : ''; ?>">Movies</a>
-                <a href="authors.php" class="<?php echo $currentPage == 'authors' ? 'active' : ''; ?>">Authors</a>
-                <a href="directors.php" class="<?php echo $currentPage == 'directors' ? 'active' : ''; ?>">Directors</a>
-                <a href="stats.php" class="<?php echo $currentPage == 'stats' ? 'active' : ''; ?>">Statistics</a>
+                <a href="stats.php" class="<?php echo $currentPage == 'stats' ? 'active' : ''; ?>">Stats</a>
                 <a href="insights.php" class="<?php echo $currentPage == 'insights' ? 'active' : ''; ?>">Insights</a>
             </div>
         </div>
