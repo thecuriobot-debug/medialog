@@ -28,18 +28,44 @@ if (!$post) {
 $pageTitle = "Book Review";
 $pageStyles = "
     /* Review Page Styles */
-    .review-header {
+    .review-container {
         background: white;
         padding: 40px;
         border-radius: 15px;
-        margin-bottom: 30px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .back-link {
+        display: inline-block;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 30px;
+        padding: 10px 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .back-link:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: translateX(-5px);
+    }
+    
+    .review-header {
+        padding-bottom: 30px;
+        border-bottom: 2px solid #e0e0e0;
+        margin-bottom: 30px;
     }
     
     .review-header h1 {
         font-size: 2.5em;
         color: #1a1a1a;
         margin-bottom: 15px;
+        line-height: 1.3;
     }
     
     .meta {
@@ -47,11 +73,14 @@ $pageStyles = "
         font-size: 1.1em;
     }
     
-    .book-info {
-        background: white;
-        padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    .meta a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .meta a:hover {
+        text-decoration: underline;
     }
     
     .book-cover {
@@ -75,28 +104,17 @@ $pageStyles = "
         margin-bottom: 1.2em;
     }
     
-    .back-link {
-        display: inline-block;
-        color: white;
-        text-decoration: none;
-        font-weight: 600;
-        margin-bottom: 30px;
-        padding: 10px 20px;
-        background: rgba(255,255,255,0.2);
-        border-radius: 8px;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-    }
-    
-    .back-link:hover {
-        background: rgba(255,255,255,0.3);
-        transform: translateX(-5px);
+    .review-content h2 {
+        margin-top: 1.5em;
+        margin-bottom: 0.8em;
+        color: #1a1a1a;
     }
 ";
 include 'includes/header.php';
 ?>
 
 <div class="container">
+    <div class="review-container">
         <a href="index.php" class="back-link">← Back to MediaLog</a>
         
         <div class="review-header">
@@ -104,21 +122,20 @@ include 'includes/header.php';
             <div class="meta">
                 Review by <strong>Thomas Hunt</strong> · 
                 <?= date('F j, Y', strtotime($post['publish_date'])) ?> · 
-                <a href="reviews.php" style="color: #666; text-decoration: underline;">More Reviews</a>
+                <a href="reviews.php">More Reviews</a>
             </div>
         </div>
         
-        <div class="book-info">
-            <?php if ($post['image_url']): ?>
-            <div class="book-cover">
-                <img src="<?= htmlspecialchars($post['image_url']) ?>" alt="Book cover">
-            </div>
-            <?php endif; ?>
-            
-            <div class="review-content">
-                <?= $post['full_content'] ?>
-            </div>
+        <?php if ($post['image_url']): ?>
+        <div class="book-cover">
+            <img src="<?= htmlspecialchars($post['image_url']) ?>" alt="Book cover">
+        </div>
+        <?php endif; ?>
+        
+        <div class="review-content">
+            <?= $post['full_content'] ?>
         </div>
     </div>
+</div>
 </body>
 </html>
