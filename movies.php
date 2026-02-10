@@ -7,7 +7,6 @@ $sort = $_GET['sort'] ?? 'date_desc';
 $rating = $_GET['rating'] ?? 'all';
 $search = $_GET['search'] ?? '';
 $year = $_GET['year'] ?? 'all';
-$genre = $_GET['genre'] ?? 'all';
 
 // Build query
 $where = "site_id = 6"; // Letterboxd only
@@ -20,12 +19,8 @@ if ($year !== 'all') {
     $where .= " AND YEAR(publish_date) = '{$year}'";
 }
 
-if ($genre !== 'all') {
-    $where .= " AND genres LIKE :genre";
-}
-
 if ($search) {
-    $where .= " AND (title LIKE :search OR director LIKE :search OR description LIKE :search)";
+    $where .= " AND (title LIKE :search OR description LIKE :search)";
 }
 
 // Sort options
@@ -46,7 +41,6 @@ $stmt = $pdo->prepare("
 
 $params = [];
 if ($search) $params['search'] = "%$search%";
-if ($genre !== 'all') $params['genre'] = "%$genre%";
 
 $stmt->execute($params);
 $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -60,20 +54,6 @@ $yearsStmt = $pdo->query("
     ORDER BY year DESC
 ");
 $years = $yearsStmt->fetchAll(PDO::FETCH_COLUMN);
-
-// Get available genres
-$genresStmt = $pdo->query("
-    SELECT DISTINCT genres 
-    FROM posts 
-    WHERE site_id = 6 AND genres IS NOT NULL AND genres != ''
-");
-$allGenres = [];
-foreach ($genresStmt->fetchAll(PDO::FETCH_COLUMN) as $genreList) {
-    $genreArray = array_map('trim', explode(',', $genreList));
-    $allGenres = array_merge($allGenres, $genreArray);
-}
-$allGenres = array_unique(array_filter($allGenres));
-sort($allGenres);
 
 // Get stats
 $statsStmt = $pdo->query("SELECT COUNT(*) as count FROM posts WHERE site_id = 6");
@@ -180,7 +160,7 @@ include 'includes/header.php';
             <div>
                 <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #666;">Search:</label>
                 <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" 
-                       placeholder="Title or director..." 
+                       placeholder="Title or description..." 
                        style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
             </div>
             
@@ -190,16 +170,6 @@ include 'includes/header.php';
                     <option value="all">All Years</option>
                     <?php foreach ($years as $y): ?>
                         <option value="<?php echo $y; ?>" <?php echo $year == $y ? 'selected' : ''; ?>><?php echo $y; ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div>
-                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #666;">Genre:</label>
-                <select name="genre" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-                    <option value="all">All Genres</option>
-                    <?php foreach ($allGenres as $g): ?>
-                        <option value="<?php echo $g; ?>" <?php echo $genre == $g ? 'selected' : ''; ?>><?php echo $g; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -247,9 +217,7 @@ include 'includes/header.php';
                 $slug = getMovieSlug($movie['url']);
                 $title = cleanTitle($movie['title']);
                 $stars = getStars($movie['title']);
-                $director = $movie['director'] ?? 'Unknown';
                 $date = date('M j, Y', strtotime($movie['publish_date']));
-                $genres = $movie['genres'] ? explode(',', $movie['genres']) : [];
             ?>
                 <a href="movie.php?slug=<?php echo $slug; ?>" class="item-card">
                     <?php if ($movie['image_url']): ?>
@@ -266,7 +234,6 @@ include 'includes/header.php';
                     <div class="item-content">
                         <h3 class="item-title"><?php echo htmlspecialchars($title); ?></h3>
                         <p class="item-meta">
-                            <strong>Directed by <?php echo htmlspecialchars($director); ?></strong><br>
                             <?php if ($stars > 0): ?>
                                 <span style="color: #d4af37; font-size: 1.1em;"><?php echo str_repeat('★', $stars); ?></span><br>
                             <?php endif; ?>
@@ -285,16 +252,6 @@ include 'includes/header.php';
                                     echo htmlspecialchars(mb_substr($reviewSnippet, 0, 150)); 
                                     ?>...
                                 </p>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (!empty($genres)): ?>
-                            <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px;">
-                                <?php foreach (array_slice($genres, 0, 3) as $g): ?>
-                                    <span class="badge" style="background: #e0e0e0; color: #666; font-size: 0.75em;">
-                                        <?php echo trim($g); ?>
-                                    </span>
-                                <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
                     </div>
