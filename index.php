@@ -180,10 +180,28 @@ function cleanTitle($title, $type) {
 ?>
 <?php
 $pageTitle = "Dashboard";
-include 'includes/header.php';
-?>
-
-<style>
+$pageStyles = "
+    /* Page-specific styles */
+    h1 {
+        font-size: 3em;
+        color: white;
+        margin-bottom: 15px;
+        text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        text-align: center;
+    }
+    
+    h2 {
+        font-size: 1.8em;
+        color: white;
+        margin: 50px 0 25px 0;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        text-align: center;
+        padding: 20px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+    }
+    
     /* Hero Section - Index Page Only */
     .hero {
         background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
@@ -238,6 +256,21 @@ include 'includes/header.php';
         margin-top: 10px;
         text-transform: uppercase;
         letter-spacing: 1px;
+    }
+    
+    /* Section boxes - white backgrounds */
+    .section-box {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .section-box h3 {
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        font-size: 1.3em;
     }
     
     /* Index-specific styles */
@@ -295,6 +328,15 @@ include 'includes/header.php';
     }
     
     @media (max-width: 768px) {
+        h1 {
+            font-size: 2em;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+            margin: 30px 0 20px 0;
+        }
+        
         .hero h1 {
             font-size: 2em;
         }
@@ -307,7 +349,9 @@ include 'includes/header.php';
             grid-template-columns: 1fr;
         }
     }
-</style>
+";
+include 'includes/header.php';
+?>
 
 <div class="hero">
         <h1>📚 Welcome to MediaLog</h1>
