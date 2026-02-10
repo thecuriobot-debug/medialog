@@ -414,20 +414,6 @@ $pageStyles = "
         text-align: center;
     }
     
-    .stat-card.highlight {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border: none;
-    }
-    
-    .stat-card.highlight .stat-number {
-        color: white;
-        font-size: 2.5em;
-    }
-    
-    .stat-card.highlight .stat-label {
-        color: rgba(255, 255, 255, 0.9);
-    }
-    
     /* Chart and Container Styles */
     .chart-container {
         background: white;
