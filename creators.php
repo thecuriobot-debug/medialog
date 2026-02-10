@@ -17,8 +17,7 @@ $authorQuery = "
     SELECT 
         TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(title, ' by ', -1), ' -', 1)) as name,
         COUNT(*) as count,
-        'author' as type,
-        GROUP_CONCAT(id ORDER BY publish_date DESC LIMIT 10) as item_ids
+        'author' as type
     FROM posts 
     WHERE {$authorWhere}
     GROUP BY name
@@ -35,8 +34,7 @@ $directorQuery = "
     SELECT 
         director as name,
         COUNT(*) as count,
-        'director' as type,
-        GROUP_CONCAT(id ORDER BY publish_date DESC LIMIT 10) as item_ids
+        'director' as type
     FROM posts 
     WHERE {$directorWhere}
     GROUP BY director
