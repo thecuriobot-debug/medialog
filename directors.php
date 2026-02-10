@@ -408,7 +408,7 @@ $mostWatchedCount = $mostWatchedDirector ? $directors[$mostWatchedDirector]['cou
                         </div>
                         
                         <div class="movies-grid">
-                            <?php foreach (array_slice($data['movies'], 0, 12) as $movie): ?>
+                            <?php foreach (array_slice($data['movies'], 0, 11) as $movie): ?>
                                 <a href="<?= htmlspecialchars($movie['url']) ?>" class="movie-poster" target="_blank" title="<?= htmlspecialchars($movie['movie_title']) ?>">
                                     <?php if (!empty($movie['image_url'])): ?>
                                         <img src="<?= htmlspecialchars($movie['image_url']) ?>" alt="<?= htmlspecialchars($movie['movie_title']) ?>">

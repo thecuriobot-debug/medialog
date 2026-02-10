@@ -1,13 +1,13 @@
 <?php
 require_once 'config.php';
-
 $pdo = getDB();
 
 // Get sort and filter parameters
 $sort = $_GET['sort'] ?? 'date_desc';
 $rating = $_GET['rating'] ?? 'all';
-$year = $_GET['year'] ?? 'all';
 $search = $_GET['search'] ?? '';
+$year = $_GET['year'] ?? 'all';
+$genre = $_GET['genre'] ?? 'all';
 
 // Build query
 $where = "site_id = 6"; // Letterboxd only
@@ -17,11 +17,15 @@ if ($rating !== 'all') {
 }
 
 if ($year !== 'all') {
-    $where .= " AND title LIKE '%, {$year} %'"; // Year in title
+    $where .= " AND YEAR(publish_date) = '{$year}'";
+}
+
+if ($genre !== 'all') {
+    $where .= " AND genres LIKE :genre";
 }
 
 if ($search) {
-    $where .= " AND (title LIKE :search OR description LIKE :search)";
+    $where .= " AND (title LIKE :search OR director LIKE :search OR description LIKE :search)";
 }
 
 // Sort options
@@ -34,308 +38,216 @@ $orderBy = match($sort) {
 };
 
 $stmt = $pdo->prepare("
-    SELECT title, url, publish_date, description, image_url, full_content
+    SELECT *
     FROM posts 
     WHERE $where
     ORDER BY $orderBy
 ");
 
-if ($search) {
-    $stmt->execute(['search' => "%$search%"]);
-} else {
-    $stmt->execute();
-}
+$params = [];
+if ($search) $params['search'] = "%$search%";
+if ($genre !== 'all') $params['genre'] = "%$genre%";
 
+$stmt->execute($params);
 $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $total = count($movies);
 
-// Get unique years for filter
-$years = [];
-foreach ($movies as $movie) {
-    if (preg_match('/, (\d{4}) /', $movie['title'], $matches)) {
-        $years[$matches[1]] = true;
-    }
+// Get available years
+$yearsStmt = $pdo->query("
+    SELECT DISTINCT YEAR(publish_date) as year 
+    FROM posts 
+    WHERE site_id = 6 
+    ORDER BY year DESC
+");
+$years = $yearsStmt->fetchAll(PDO::FETCH_COLUMN);
+
+// Get available genres
+$genresStmt = $pdo->query("
+    SELECT DISTINCT genres 
+    FROM posts 
+    WHERE site_id = 6 AND genres IS NOT NULL AND genres != ''
+");
+$allGenres = [];
+foreach ($genresStmt->fetchAll(PDO::FETCH_COLUMN) as $genreList) {
+    $genreArray = array_map('trim', explode(',', $genreList));
+    $allGenres = array_merge($allGenres, $genreArray);
 }
-krsort($years);
+$allGenres = array_unique(array_filter($allGenres));
+sort($allGenres);
+
+// Get stats
+$statsStmt = $pdo->query("SELECT COUNT(*) as count FROM posts WHERE site_id = 6");
+$totalAllMovies = $statsStmt->fetch()['count'];
+
+$currentYear = date('Y');
+$thisYearStmt = $pdo->query("
+    SELECT COUNT(*) as count FROM posts 
+    WHERE site_id = 6 AND YEAR(publish_date) = {$currentYear}
+");
+$moviesThisYear = $thisYearStmt->fetch()['count'];
+
+// Helper functions
+function getStars($title) {
+    return substr_count($title, '★');
+}
+
+function cleanTitle($title) {
+    $title = preg_replace('/, \d{4}.*$/', '', $title);
+    return trim($title);
+}
+
+function getMovieSlug($url) {
+    if (preg_match('/\/film\/([^\/]+)/', $url, $matches)) {
+        return $matches[1];
+    }
+    return null;
+}
+
+$pageTitle = "Movies";
+include 'includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Movies - MediaLog</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Georgia', 'Times New Roman', serif;
-            background: #f5f5f5;
-            padding: 0;
-            color: #1a1a1a;
-        }
-        
-        .top-nav {
-            background: #1a1a1a;
-            border-bottom: 3px solid #d4af37;
-            padding: 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-        }
-        
-        .nav-brand {
-            font-family: 'Georgia', serif;
-            font-size: 24px;
-            font-weight: bold;
-            color: #d4af37;
-            padding: 15px 0;
-            text-decoration: none;
-            letter-spacing: 1px;
-        }
-        
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 0;
-        }
-        
-        .nav-links a {
-            display: block;
-            padding: 20px 20px;
-            color: #fff;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .nav-links a:hover {
-            background: #2a2a2a;
-            border-bottom-color: #d4af37;
-        }
-        
-        .nav-links a.active {
-            background: #2a2a2a;
-            border-bottom-color: #d4af37;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            color: #1a1a1a;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1em;
-        }
-        
-        .filters {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .filter-group label {
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-        
-        select, input[type="text"] {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: inherit;
-        }
-        
-        button {
-            background: #1a1a1a;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: inherit;
-        }
-        
-        button:hover {
-            background: #333;
-        }
-        
-        .movies-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        
-        .movie-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .movie-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        }
-        
-        .movie-poster {
-            width: 100%;
-            aspect-ratio: 2/3;
-            object-fit: cover;
-            background: #e0e0e0;
-        }
-        
-        .movie-info {
-            padding: 15px;
-        }
-        
-        .movie-title {
-            font-size: 1.1em;
-            margin-bottom: 8px;
-            line-height: 1.3;
-        }
-        
-        .movie-title a {
-            color: #1a1a1a;
-            text-decoration: none;
-        }
-        
-        .movie-title a:hover {
-            color: #d4af37;
-        }
-        
-        .movie-date {
-            color: #999;
-            font-size: 0.85em;
-        }
-    </style>
-</head>
-<body>
-    <nav class="top-nav">
-        <div class="nav-container">
-            <a href="index.php" class="nav-brand">MEDIALOG</a>
-            <ul class="nav-links">
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="books.php">Books</a></li>
-                <li><a href="movies.php" class="active">Movies</a></li>
-                <li><a href="authors.php">Authors</a></li>
-                <li><a href="directors.php">Directors</a></li>
-                <li><a href="stats.php">Statistics</a></li>
-                <li><a href="insights.php">Insights</a></li>
-            </ul>
-        </div>
-    </nav>
+
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>🎬 Movies Collection</h1>
+        <p>Your viewing journey from Letterboxd</p>
+    </div>
     
-    <div class="container">
-        <h1>🎬 All Movies</h1>
-        <div class="subtitle"><?= $total ?> movies watched</div>
-        
-        <form method="get" class="filters">
-            <div class="filter-group">
-                <label>Sort:</label>
-                <select name="sort" onchange="this.form.submit()">
-                    <option value="date_desc" <?= $sort === 'date_desc' ? 'selected' : '' ?>>Most Recent</option>
-                    <option value="date_asc" <?= $sort === 'date_asc' ? 'selected' : '' ?>>Oldest First</option>
-                    <option value="title" <?= $sort === 'title' ? 'selected' : '' ?>>Title A-Z</option>
-                    <option value="rating_desc" <?= $sort === 'rating_desc' ? 'selected' : '' ?>>Highest Rated</option>
-                </select>
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number"><?php echo $totalAllMovies; ?></div>
+            <div class="stat-label">Total Movies</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><?php echo $moviesThisYear; ?></div>
+            <div class="stat-label"><?php echo $currentYear; ?> Movies</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><?php echo $total; ?></div>
+            <div class="stat-label">Showing</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><?php echo count($years); ?></div>
+            <div class="stat-label">Years</div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card" style="margin-bottom: 30px;">
+        <form method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #666;">Search:</label>
+                <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" 
+                       placeholder="Title or director..." 
+                       style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
             </div>
             
-            <div class="filter-group">
-                <label>Rating:</label>
-                <select name="rating" onchange="this.form.submit()">
-                    <option value="all" <?= $rating === 'all' ? 'selected' : '' ?>>All Ratings</option>
-                    <option value="★★★★★" <?= $rating === '★★★★★' ? 'selected' : '' ?>>★★★★★</option>
-                    <option value="★★★★" <?= $rating === '★★★★' ? 'selected' : '' ?>>★★★★</option>
-                    <option value="★★★" <?= $rating === '★★★' ? 'selected' : '' ?>>★★★</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label>Year:</label>
-                <select name="year" onchange="this.form.submit()">
-                    <option value="all" <?= $year === 'all' ? 'selected' : '' ?>>All Years</option>
-                    <?php foreach (array_keys($years) as $y): ?>
-                        <option value="<?= $y ?>" <?= $year === $y ? 'selected' : '' ?>><?= $y ?></option>
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #666;">Year:</label>
+                <select name="year" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <option value="all">All Years</option>
+                    <?php foreach ($years as $y): ?>
+                        <option value="<?php echo $y; ?>" <?php echo $year == $y ? 'selected' : ''; ?>><?php echo $y; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             
-            <div class="filter-group">
-                <input type="text" name="search" placeholder="Search movies..." value="<?= htmlspecialchars($search) ?>">
-                <button type="submit">Search</button>
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #666;">Genre:</label>
+                <select name="genre" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <option value="all">All Genres</option>
+                    <?php foreach ($allGenres as $g): ?>
+                        <option value="<?php echo $g; ?>" <?php echo $genre == $g ? 'selected' : ''; ?>><?php echo $g; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #666;">Rating:</label>
+                <select name="rating" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <option value="all">All Ratings</option>
+                    <option value="★★★★★" <?php echo $rating == '★★★★★' ? 'selected' : ''; ?>>★★★★★ 5 stars</option>
+                    <option value="★★★★" <?php echo $rating == '★★★★' ? 'selected' : ''; ?>>★★★★ 4 stars</option>
+                    <option value="★★★" <?php echo $rating == '★★★' ? 'selected' : ''; ?>>★★★ 3 stars</option>
+                    <option value="★★" <?php echo $rating == '★★' ? 'selected' : ''; ?>>★★ 2 stars</option>
+                    <option value="★" <?php echo $rating == '★' ? 'selected' : ''; ?>>★ 1 star</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #666;">Sort:</label>
+                <select name="sort" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <option value="date_desc" <?php echo $sort == 'date_desc' ? 'selected' : ''; ?>>Newest First</option>
+                    <option value="date_asc" <?php echo $sort == 'date_asc' ? 'selected' : ''; ?>>Oldest First</option>
+                    <option value="title" <?php echo $sort == 'title' ? 'selected' : ''; ?>>Title A-Z</option>
+                    <option value="rating_desc" <?php echo $sort == 'rating_desc' ? 'selected' : ''; ?>>Highest Rated</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; align-items: flex-end;">
+                <button type="submit" style="width: 100%; padding: 10px 20px; background: linear-gradient(135deg, #c2185b, #e91e63); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                    Apply Filters
+                </button>
             </div>
         </form>
-        
-        <div class="movies-grid">
-            <?php foreach ($movies as $movie): ?>
-                <?php
-                    // Extract movie ID from Letterboxd URL
-                    preg_match('#/film/([^/]+)#', $movie['url'], $matches);
-                    $movieId = $matches[1] ?? '';
-                    $localUrl = $movieId ? "movie.php?id={$movieId}" : $movie['url'];
-                ?>
-                <div class="movie-card">
+    </div>
+    
+    <!-- Movies Grid -->
+    <?php if (empty($movies)): ?>
+        <div class="card" style="text-align: center; padding: 60px 30px;">
+            <div style="font-size: 4em; margin-bottom: 20px;">🎬</div>
+            <h2 style="color: #666; margin-bottom: 10px;">No movies found</h2>
+            <p style="color: #999;">Try adjusting your filters or search terms</p>
+        </div>
+    <?php else: ?>
+        <div class="item-grid">
+            <?php foreach ($movies as $movie): 
+                $slug = getMovieSlug($movie['url']);
+                $title = cleanTitle($movie['title']);
+                $stars = getStars($movie['title']);
+                $director = $movie['director'] ?? 'Unknown';
+                $date = date('M j, Y', strtotime($movie['publish_date']));
+                $genres = $movie['genres'] ? explode(',', $movie['genres']) : [];
+            ?>
+                <a href="movie.php?slug=<?php echo $slug; ?>" class="item-card">
                     <?php if ($movie['image_url']): ?>
-                        <a href="<?= htmlspecialchars($localUrl) ?>">
-                            <img src="<?= htmlspecialchars($movie['image_url']) ?>" 
-                                 alt="Movie poster" 
-                                 class="movie-poster">
-                        </a>
+                        <img src="<?php echo htmlspecialchars($movie['image_url']); ?>" 
+                             alt="<?php echo htmlspecialchars($title); ?>" 
+                             class="item-image"
+                             onerror="this.src='https://via.placeholder.com/300x400/c2185b/ffffff?text=No+Poster'">
+                    <?php else: ?>
+                        <div class="item-image" style="background: linear-gradient(135deg, #c2185b, #e91e63); display: flex; align-items: center; justify-content: center; color: white; font-size: 3em;">
+                            🎬
+                        </div>
                     <?php endif; ?>
                     
-                    <div class="movie-info">
-                        <div class="movie-title">
-                            <a href="<?= htmlspecialchars($localUrl) ?>">
-                                <?= htmlspecialchars($movie['title']) ?>
-                            </a>
-                        </div>
-                        <div class="movie-date">
-                            Watched <?= date('M j, Y', strtotime($movie['publish_date'])) ?>
-                        </div>
+                    <div class="item-content">
+                        <h3 class="item-title"><?php echo htmlspecialchars($title); ?></h3>
+                        <p class="item-meta">
+                            <strong>Directed by <?php echo htmlspecialchars($director); ?></strong><br>
+                            <?php if ($stars > 0): ?>
+                                <span style="color: #d4af37; font-size: 1.1em;"><?php echo str_repeat('★', $stars); ?></span><br>
+                            <?php endif; ?>
+                            <span style="color: #999;">Watched: <?php echo $date; ?></span>
+                        </p>
+                        <?php if (!empty($genres)): ?>
+                            <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px;">
+                                <?php foreach (array_slice($genres, 0, 3) as $g): ?>
+                                    <span class="badge" style="background: #e0e0e0; color: #666; font-size: 0.75em;">
+                                        <?php echo trim($g); ?>
+                                    </span>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                </div>
+                </a>
             <?php endforeach; ?>
         </div>
-    </div>
+    <?php endif; ?>
+</div>
+
+<?php include 'includes/footer.php'; ?>
 </body>
 </html>

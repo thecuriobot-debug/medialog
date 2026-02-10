@@ -401,7 +401,7 @@ $mostReadCount = count($authors[$mostReadAuthor]['books']);
                         </div>
                         
                         <div class="books-grid">
-                            <?php foreach (array_slice($data['books'], 0, 12) as $book): ?>
+                            <?php foreach (array_slice($data['books'], 0, 11) as $book): ?>
                                 <a href="<?= htmlspecialchars($book['url']) ?>" class="book-cover" target="_blank" title="<?= htmlspecialchars($book['title']) ?>">
                                     <?php if (!empty($book['image_url'])): ?>
                                         <img src="<?= htmlspecialchars($book['image_url']) ?>" alt="<?= htmlspecialchars($book['title']) ?>">
