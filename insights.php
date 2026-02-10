@@ -415,15 +415,17 @@ $pageStyles = "
     }
     
     .stat-card.highlight {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
-        border: 2px solid rgba(102, 126, 234, 0.3);
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
     }
     
     .stat-card.highlight .stat-number {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: white;
         font-size: 2.5em;
+    }
+    
+    .stat-card.highlight .stat-label {
+        color: rgba(255, 255, 255, 0.9);
     }
     
     /* Chart and Container Styles */
