@@ -22,7 +22,7 @@ $pdo = getDB();
 
 echo "📂 Reading CSV file...\n";
 $file = fopen($csvFile, 'r');
-$header = fgetcsv($file); // Read header row
+$header = fgetcsv($file, 0, ',', '"', '\\'); // Read header row
 
 echo "📋 CSV Columns: " . implode(', ', $header) . "\n\n";
 
@@ -43,32 +43,37 @@ $imported = 0;
 $updated = 0;
 $skipped = 0;
 
-while (($row = fgetcsv($file)) !== false) {
+while (($row = fgetcsv($file, 0, ',', '"', '\\')) !== false) {
     $data = array_combine($header, $row);
     
     // Extract data
     $name = $data['Name'];
     $year = $data['Year'];
     $letterboxdUri = $data['Letterboxd URI'];
-    $rating = isset($data['Rating']) ? floatval($data['Rating']) : 0;
+    $rating = isset($data['Rating']) && $data['Rating'] !== '' ? floatval($data['Rating']) : 0;
     
-    // Get date
-    if ($isDiary && isset($data['Date'])) {
-        $watchDate = $data['Date']; // Format: YYYY-MM-DD
+    // Get date - prefer "Watched Date" over "Date" 
+    if (isset($data['Watched Date']) && !empty($data['Watched Date'])) {
+        $watchDate = $data['Watched Date']; // Actual watch date
+    } elseif (isset($data['Date']) && !empty($data['Date'])) {
+        $watchDate = $data['Date']; // Log date as fallback
     } else {
-        // For watched.csv without dates, use current date
-        $watchDate = date('Y-m-d');
+        $watchDate = date('Y-m-d'); // Current date as last resort
     }
     
     // Get rewatch status
     $isRewatch = isset($data['Rewatch']) && strtolower($data['Rewatch']) === 'yes';
     
-    // Get review
-    $review = isset($data['Review']) ? $data['Review'] : '';
-    $tags = isset($data['Tags']) ? $data['Tags'] : '';
+    // Get review and tags
+    $review = isset($data['Review']) && !empty($data['Review']) ? $data['Review'] : '';
+    $tags = isset($data['Tags']) && !empty($data['Tags']) ? $data['Tags'] : '';
     
-    // Build full URL
-    $url = 'https://letterboxd.com' . $letterboxdUri;
+    // Handle URI - could be full URL or path
+    if (strpos($letterboxdUri, 'http') === 0) {
+        $url = $letterboxdUri; // Already full URL (e.g., https://boxd.it/...)
+    } else {
+        $url = 'https://letterboxd.com' . $letterboxdUri; // Path only
+    }
     $urlHash = hash('sha256', $url);
     
     // Build title with stars
@@ -120,8 +125,8 @@ while (($row = fgetcsv($file)) !== false) {
         $stmt = $pdo->prepare("
             INSERT INTO posts (
                 site_id, title, url, url_hash, description, 
-                full_content, publish_date, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+                full_content, publish_date
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
             6, // Letterboxd site_id
