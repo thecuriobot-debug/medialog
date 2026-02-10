@@ -139,6 +139,17 @@ $pageStyles = "
         transform: translateY(-8px);
         box-shadow: 0 12px 40px rgba(0,0,0,0.2);
     }
+    
+    .item-content {
+        padding: 20px;
+        overflow: hidden;
+    }
+    
+    .item-content p {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+    }
 ";
 include 'includes/header.php';
 ?>
@@ -273,7 +284,7 @@ include 'includes/header.php';
                             $description = strip_tags($movie['description']);
                             $snippet = mb_strlen($description) > 120 ? mb_substr($description, 0, 120) . '...' : $description;
                         ?>
-                            <p style="color: #666; font-size: 0.9em; line-height: 1.5; margin-top: 10px; font-style: italic;">
+                            <p style="color: #666; font-size: 0.9em; line-height: 1.5; margin-top: 10px; font-style: italic; max-width: 100%; overflow-wrap: break-word;">
                                 "<?php echo htmlspecialchars($snippet); ?>"
                             </p>
                         <?php endif; ?>
