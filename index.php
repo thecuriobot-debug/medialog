@@ -382,7 +382,7 @@ include 'includes/header.php';
     
     <!-- What's New Banner -->
     <div class="container" style="margin-top: -30px; margin-bottom: 30px;">
-        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; max-width: 1400px; margin: 0 auto;">
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #667eea 100%); color: white; border: none; max-width: 1400px; margin: 0 auto;">
             <div style="padding: 40px 30px;">
                 <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 25px;">
                     <div style="font-size: 3em;">✨</div>
