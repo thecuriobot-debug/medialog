@@ -277,6 +277,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             <a href="index.php" class="nav-brand">MEDIALOG</a>
             <div class="nav-links">
                 <a href="index.php" class="<?php echo $currentPage == 'index' ? 'active' : ''; ?>">Dashboard</a>
+                <a href="search.php" class="<?php echo $currentPage == 'search' ? 'active' : ''; ?>">🔍 Search</a>
                 <a href="books.php" class="<?php echo $currentPage == 'books' ? 'active' : ''; ?>">Books</a>
                 <a href="movies.php" class="<?php echo $currentPage == 'movies' ? 'active' : ''; ?>">Movies</a>
                 <a href="authors.php" class="<?php echo $currentPage == 'authors' ? 'active' : ''; ?>">Authors</a>
