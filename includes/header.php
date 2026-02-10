@@ -370,6 +370,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                 <a href="index.php" class="<?php echo $currentPage == 'index' ? 'active' : ''; ?>">Home</a>
                 <a href="books.php" class="<?php echo $currentPage == 'books' ? 'active' : ''; ?>">Books</a>
                 <a href="movies.php" class="<?php echo $currentPage == 'movies' ? 'active' : ''; ?>">Movies</a>
+                <a href="creators.php" class="<?php echo $currentPage == 'creators' ? 'active' : ''; ?>">Creators</a>
                 <a href="stats.php" class="<?php echo $currentPage == 'stats' ? 'active' : ''; ?>">Stats</a>
                 <a href="insights.php" class="<?php echo $currentPage == 'insights' ? 'active' : ''; ?>">Insights</a>
             </div>
