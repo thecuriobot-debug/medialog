@@ -414,6 +414,56 @@ $pageStyles = "
         text-align: center;
     }
     
+    /* Override stat-card styles for insights page - Glass morphism design */
+    .stat-card {
+        background: rgba(139, 148, 228, 0.15);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(139, 148, 228, 0.3);
+        padding: 30px 25px;
+        border-radius: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card:hover {
+        background: rgba(139, 148, 228, 0.2);
+        border-color: rgba(139, 148, 228, 0.4);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card .stat-number {
+        font-size: 3em;
+        font-weight: 800;
+        color: #fbbf24;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 10px rgba(251, 191, 36, 0.4);
+    }
+    
+    .stat-card .stat-label {
+        font-size: 0.85em;
+        color: rgba(255, 255, 255, 0.95);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 600;
+    }
+    
+    .stat-card.highlight {
+        background: rgba(167, 139, 250, 0.2);
+        border: 2px solid rgba(167, 139, 250, 0.5);
+    }
+    
+    .stat-card.highlight:hover {
+        background: rgba(167, 139, 250, 0.25);
+        border-color: rgba(167, 139, 250, 0.6);
+    }
+    
+    .stat-card.highlight .stat-number {
+        color: white;
+        text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+    }
+    
     /* Chart and Container Styles */
     .chart-container {
         background: white;
